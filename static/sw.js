@@ -13,11 +13,11 @@ const CACHE_IMAGES  = "kd-images-v1";
 // Assets del shell que se pre-cachean al instalar
 const SHELL_ASSETS = [
   "/",
-  "/static/css/style.css",
-  "/static/js/app.js",
-  "/static/manifest.json",
-  "/static/icons/icon-192.png",
-  "/static/icons/icon-512.png",
+  "/css/styles.css",
+  "/js/app.js",
+  "/manifest.json",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
   "/offline.html",
   "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap"
 ];
@@ -83,6 +83,10 @@ self.addEventListener("fetch", event => {
   // 3. Assets estáticos (CSS, JS, fuentes, iconos) → Cache First
   if (
     url.pathname.startsWith("/static/") ||
+    url.pathname.startsWith("/css/") ||
+    url.pathname.startsWith("/js/") ||
+    url.pathname.startsWith("/icons/") ||
+    url.pathname === "/manifest.json" ||
     url.hostname === "fonts.googleapis.com" ||
     url.hostname === "fonts.gstatic.com"
   ) {

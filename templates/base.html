@@ -13,8 +13,8 @@
   <meta name="apple-mobile-web-app-capable"        content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title"          content="KingsDealer" />
-  <link rel="apple-touch-icon" href="/static/icons/icon-192.png" />
-  <link rel="manifest"         href="/static/manifest.json" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+  <link rel="manifest"         href="/manifest.json" />
 
   <style>
     body {
@@ -36,7 +36,7 @@
   <!-- Cropper.js CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+  <link rel="stylesheet" href="/css/styles.css" />
   {% block head %}{% endblock %}
 </head>
 <body>
@@ -175,8 +175,10 @@
     window.confirmCrop = function() {
       if (!cropper || !activeInput) return;
 
-      // Calidad alta — JPEG al 92%
-      const canvas = cropper.getCroppedCanvas({ maxWidth: 2400, maxHeight: 2400 });
+      // JPEG a 1600px / 82% — buena calidad visual y peso liviano.
+      // (Vercel rechaza cualquier request que supere 4.5 MB en total; ver
+      // también la validación de tamaño total antes de enviar el formulario.)
+      const canvas = cropper.getCroppedCanvas({ maxWidth: 1600, maxHeight: 1600 });
       canvas.toBlob(function(blob) {
         const originalName = pendingFiles[pendingIndex].name.replace(/\.[^.]+$/, '') + '.jpg';
         const croppedFile  = new File([blob], originalName, { type: 'image/jpeg' });
@@ -198,7 +200,7 @@
           // Limpiar para la próxima selección
           croppedFiles[activeInput.id] = [];
         }
-      }, 'image/jpeg', 0.92);
+      }, 'image/jpeg', 0.82);
     };
 
     window.cancelCrop = function() {

@@ -23,7 +23,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = Flask(__name__)
+# static_folder=None: en Vercel los archivos estáticos (css/js/icons) se sirven
+# desde /public vía CDN y no deben pasar por la función Python (ver vercel.json).
+app = Flask(__name__, static_folder=None)
 
 _secret = os.environ.get("SECRET_KEY")
 if not _secret:
@@ -35,6 +37,8 @@ app.config['SESSION_COOKIE_SECURE']   = True   # la cookie solo viaja por HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True   # no accesible desde JS (protección XSS)
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # mitiga CSRF básico
 
+# Nota: no se escribe nada aquí (las imágenes se guardan en PostgreSQL, ver
+# guardar_imagen). Se conserva por compatibilidad con la ruta /static/uploads/.
 UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
 ALLOWED_EXTENSIONS  = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
 MAX_CONTENT_LENGTH  = 8 * 1024 * 1024 * 20   # 20 fotos × 8 MB máx
@@ -97,7 +101,12 @@ def get_db():
 
 
 def init_db():
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    # En Vercel el filesystem de la función es de solo lectura (salvo /tmp),
+    # así que esto puede fallar; se ignora porque la carpeta no se usa (ver arriba).
+    try:
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    except OSError:
+        pass
     with get_db() as conn:
         conn.execute('''
             CREATE TABLE IF NOT EXISTS imagenes (
