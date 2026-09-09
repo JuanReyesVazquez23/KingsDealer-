@@ -248,9 +248,9 @@ def get_config(clave, default=''):
 # RUTAS PWA
 # ══════════════════════════════════════════════════════════════════
 
-@app.route('/static/sw.js')
+@app.route('/sw.js')
 def service_worker():
-    resp = send_from_directory(os.path.join(app.root_path, 'static'), 'sw.js', mimetype='application/javascript')
+    resp = send_from_directory(os.path.join(app.root_path, 'public'), 'sw.js', mimetype='application/javascript')
     resp.headers['Service-Worker-Allowed'] = '/'
     resp.headers['Cache-Control']          = 'no-cache, no-store, must-revalidate'
     return resp

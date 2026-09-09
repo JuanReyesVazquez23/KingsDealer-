@@ -10,3 +10,7 @@ static/uploads/*
 Thumbs.db
 .vscode/
 .idea/
+
+# Build outputs (generados desde src/*.ts)
+node_modules/
+public/js/app.js

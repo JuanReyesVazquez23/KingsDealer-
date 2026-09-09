@@ -1,913 +1,122 @@
-/* ═══════════════════════════════════════════════
-   KingsDealer — app.js  v6
-   Errores corregidos:
-   · resetForm buscaba elementos que pueden no existir
-   · editVehicle llamaba a setMoneda que no era accesible aquí
-   · openModalFromSlider podía entrar en loop si id no existía
-   · initFilters podía registrar doble event si loadVehicles se
-     llamaba antes de que el DOM estuviera listo
-   Nuevas funciones:
-   · showToast disponible globalmente (usada también desde index.html)
-═══════════════════════════════════════════════ */
-
-'use strict';
-
-// ── Validación de peso antes de subir fotos ──────
-// El hosting rechaza cualquier request de más de 4.5 MB en total,
-// así que revisamos antes de enviar para dar un mensaje claro
-// en vez de un error de red genérico.
-const MAX_UPLOAD_BYTES = 4 * 1024 * 1024; // 4 MB de margen de seguridad
-
-function pesoTotalFotos(formData) {
-  let total = 0;
-  for (const value of formData.values()) {
-    if (value instanceof File) total += value.size;
-  }
-  return total;
-}
-
-function formatMB(bytes) {
-  return (bytes / (1024 * 1024)).toFixed(1);
-}
-
-// ── Estado global ────────────────────────────────
-let allVehicles  = [];
-let activeFilter = '';
-let editingId    = null;
-let sortPrecio   = '';
-let sortAnio     = '';
-let filterMarca  = '';
-let keepImages   = [];
-
-// ── Show more / Show less ────────────────────────
-const CARDS_INITIAL = 5;
-let showingAll      = false;
-let isParticulares  = false;
-let allParticulares = [];
-
-// ── Init ─────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  loadVehicles();
-  loadOfertas();
-  initFilters();
-  initSortBar();
-  initMobileNav();
-  initSecretTrigger();
-  initFotoPreview();
-  updateStatCount();
-});
-
-// ══════════════════════════════════════════════════
-// CARGA Y RENDER
-// ══════════════════════════════════════════════════
-
-async function loadVehicles() {
-  const grid = document.getElementById('vehiclesGrid');
-  try {
-    if (isParticulares) {
-      const res = await fetch('/api/particulares');
-      if (!res.ok) throw new Error();
-      allParticulares = await res.json();
-      renderVehicles(allParticulares);
-      return;
-    }
-    const url = activeFilter
-      ? `/api/vehiculos?tipo=${encodeURIComponent(activeFilter)}`
-      : '/api/vehiculos';
-    const res = await fetch(url);
-    if (!res.ok) throw new Error();
-    allVehicles = await res.json();
-    populateMarcaSelect();
-    applySort();
-    updateStatCount();
-  } catch {
-    if (grid) grid.innerHTML =
-      '<div class="empty-state"><div class="es-icon">⚠️</div><p>No se pudo cargar el catálogo. Verifica tu conexión.</p></div>';
-  }
-}
-
-// ── Moneda helpers ────────────────────────────────
-function fmtMoneda(valor, moneda) {
-  return `${moneda === 'USD' ? 'US$' : 'RD$'} ${formatPrice(valor)}`;
-}
-
-function badgeMoneda(moneda) {
-  const cls = moneda === 'USD' ? 'card-moneda-usd' : 'card-moneda-dop';
-  return `<span class="card-moneda-badge ${cls}">${moneda || 'DOP'}</span>`;
-}
-
-// ── Render tarjetas ───────────────────────────────
-function renderVehicles(list) {
-  const grid     = document.getElementById('vehiclesGrid');
-  const moreWrap = document.getElementById('showMoreWrap');
-  const gridWrap = document.getElementById('gridWrap');
-  if (!grid) return;
-
-  if (gridWrap) gridWrap.classList.toggle('grid-wrap--part', isParticulares);
-
-  if (!list.length) {
-    grid.innerHTML = `
-      <div class="empty-state${isParticulares ? ' empty-state--dark' : ''}">
+let I=[],R="",x=null,ce="",se="",re="",M=[];const ee=5;let S=!1,v=!1,k=[],A=[],$=[],L=0,V=null;const Le=4500;let U=null;function le(e){I=e}function Ae(e){R=e}function de(e){x=e}function j(e){ce=e}function H(e){se=e}function W(e){re=e}function q(e){M=e}function z(e){S=e}function Ce(e){v=e}function Se(e){k=e}function Me(e){A=e}function xe(e){$=e}function Te(e){L=e}function Pe(e){V=e}function ke(e){U=e}function m(e){return e==null?"":String(e).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}function Fe(e){return Number(e).toLocaleString("es-DO")}function b(e,t){return`${t==="USD"?"US$":"RD$"} ${Fe(e)}`}function De(e){return`<span class="card-moneda-badge ${e==="USD"?"card-moneda-usd":"card-moneda-dop"}">${e}</span>`}function Oe(e){let t=0;for(const n of e.values())n instanceof File&&(t+=n.size);return t}function te(e){return(e/(1024*1024)).toFixed(1)}function E(e,t=""){const n=document.getElementById("toast");if(!n)return;U&&clearTimeout(U),n.textContent=e,n.className=`toast show${t?" "+t:""}`;const o=setTimeout(()=>{n.className="toast"},3200);ke(o)}async function Ne(e){const t=e?`/api/vehiculos?tipo=${encodeURIComponent(e)}`:"/api/vehiculos",n=await fetch(t);if(!n.ok)throw new Error;return n.json()}async function _e(){const e=await fetch("/api/particulares");if(!e.ok)throw new Error;return e.json()}async function Ve(){const e=await fetch("/api/ofertas");return e.ok?e.json():[]}async function Ue(){const e=await fetch("/api/count");if(!e.ok)throw new Error;return e.json()}async function Re(){return(await fetch("/api/config/mapa")).json()}async function je(e,t,n){return(await fetch("/api/config/mapa",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({lat:e,lon:t,label:n})})).ok}async function He(e){return(await fetch(`/api/vehiculos/${e}`,{method:"DELETE"})).ok}async function We(e,t){const n=e!==null,o=await fetch(n?`/api/vehiculos/${e}`:"/api/vehiculos",{method:n?"PUT":"POST",body:t}),i=await o.json();return{ok:o.ok,error:i.error}}async function qe(e){const t=e?`/api/anuncios?estado=${e}`:"/api/anuncios";return(await fetch(t)).json()}async function ze(e,t){await fetch(`/api/anuncios/${e}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({estado:t})})}async function Ge(e){await fetch(`/api/anuncios/${e}`,{method:"DELETE"})}async function Ke(e){const t=await fetch("/api/anuncios",{method:"POST",body:e}),n=await t.json();return{ok:t.ok,error:n.error}}async function O(){const e=document.getElementById("vehiclesGrid");try{if(v){const n=await _e();Se(n),P(k);return}const t=await Ne(R||void 0);le(t),Ye(),me(),tt()}catch{e&&(e.innerHTML='<div class="empty-state"><div class="es-icon">⚠️</div><p>No se pudo cargar el catálogo. Verifica tu conexión.</p></div>')}}function Je(e){return e.imagen?`<img class="card-img" src="/img/${m(e.imagen)}"
+                 alt="${m(e.marca)} ${m(e.modelo)}" loading="lazy" />`:`<div class="card-img-placeholder">
+            <span class="ph-icon">🚗</span>
+            <span>${m(e.marca)} ${m(e.modelo)}</span>
+          </div>`}function P(e){const t=document.getElementById("vehiclesGrid"),n=document.getElementById("showMoreWrap"),o=document.getElementById("gridWrap");if(!t)return;if(o&&o.classList.toggle("grid-wrap--part",v),!e.length){t.innerHTML=`
+      <div class="empty-state${v?" empty-state--dark":""}">
         <div class="es-icon">🚗</div>
-        <p>${isParticulares ? 'No hay publicaciones de vendedores particulares.' : 'No hay vehículos en esta categoría.'}</p>
-      </div>`;
-    if (moreWrap) moreWrap.style.display = 'none';
-    return;
-  }
-
-  const isTodos     = !activeFilter && !isParticulares;
-  const needsToggle = (isTodos || isParticulares) && list.length > CARDS_INITIAL;
-  if (!needsToggle) showingAll = false;
-
-  const displayList = needsToggle && !showingAll ? list.slice(0, CARDS_INITIAL) : list;
-
-  if (moreWrap) {
-    moreWrap.style.display = needsToggle ? 'flex' : 'none';
-    const label = document.getElementById('showMoreLabel');
-    const arrow = document.getElementById('showMoreArrow');
-    const btn   = document.getElementById('showMoreBtn');
-    const txt   = isParticulares ? 'publicaciones' : 'vehículos';
-    if (label) label.textContent    = showingAll ? `Ver menos ${txt}` : `Ver más ${txt}`;
-    if (arrow) arrow.style.transform = showingAll ? 'rotate(180deg)' : 'rotate(0deg)';
-    if (btn)   btn.classList.toggle('btn-show-more--part', isParticulares);
-  }
-
-  grid.innerHTML = displayList.map((v, i) => {
-    const moneda = v.moneda || 'DOP';
-    const precioHtml = v.oferta && v.precio_oferta
-      ? `<span class="price-original">${fmtMoneda(v.precio, moneda)}</span>
-         <span class="price-oferta">${fmtMoneda(v.precio_oferta, moneda)}</span>`
-      : fmtMoneda(v.precio, moneda);
-
-    const adminBtns = (typeof ROLE !== 'undefined' && ROLE === 'admin')
-      ? `<button class="card-btn card-btn-edit"   onclick="editVehicle(${v.id})">✏️</button>
-         <button class="card-btn card-btn-delete" onclick="deleteVehicle(${v.id})">🗑</button>`
-      : '';
-
-    const esCliente = v.origen === 'cliente';
-    // CRÍTICO: pasar el origen para evitar colisión de IDs entre dealer y clientes
-    return `
-    <article class="vehicle-card${v.oferta ? ' card-en-oferta' : ''}${esCliente ? ' card-cliente' : ''}" style="animation-delay:${i * 50}ms">
-      ${v.oferta ? '<div class="card-oferta-ribbon">OFERTA</div>' : ''}
-      ${esCliente ? '<div class="card-cliente-ribbon">Particular</div>' : ''}
-      ${buildCardImage(v)}
+        <p>${v?"No hay publicaciones de vendedores particulares.":"No hay vehículos en esta categoría."}</p>
+      </div>`,n&&(n.style.display="none");return}const c=(!R&&!v||v)&&e.length>ee;c||z(!1);const s=c&&!S?e.slice(0,ee):e;if(n){n.style.display=c?"flex":"none";const a=document.getElementById("showMoreLabel"),r=document.getElementById("showMoreArrow"),d=document.getElementById("showMoreBtn"),u=v?"publicaciones":"vehículos";a&&(a.textContent=S?`Ver menos ${u}`:`Ver más ${u}`),r&&(r.style.transform=S?"rotate(180deg)":"rotate(0deg)"),d&&d.classList.toggle("btn-show-more--part",v)}t.innerHTML=s.map((a,r)=>{const d=a.moneda||"DOP",u=a.oferta&&a.precio_oferta?`<span class="price-original">${b(a.precio,d)}</span>
+         <span class="price-oferta">${b(a.precio_oferta,d)}</span>`:b(a.precio,d),f=typeof ROLE<"u"&&ROLE==="admin"?`<button class="card-btn card-btn-edit"   onclick="editVehicle(${a.id})">✏️</button>
+         <button class="card-btn card-btn-delete" onclick="deleteVehicle(${a.id})">🗑</button>`:"",y=a.origen==="cliente";return`
+    <article class="vehicle-card${a.oferta?" card-en-oferta":""}${y?" card-cliente":""}" style="animation-delay:${r*50}ms">
+      ${a.oferta?'<div class="card-oferta-ribbon">OFERTA</div>':""}
+      ${y?'<div class="card-cliente-ribbon">Particular</div>':""}
+      ${Je(a)}
       <div class="card-body">
         <div class="card-tipo-row">
-          <span class="card-tipo">${esc(v.tipo)}</span>
-          ${badgeMoneda(moneda)}
+          <span class="card-tipo">${m(a.tipo)}</span>
+          ${De(d)}
         </div>
-        <div class="card-name">${esc(v.marca)} ${esc(v.modelo)}<span class="card-year">${v.anio}</span></div>
-        ${esCliente && v.condicion ? `<span class="card-condicion card-condicion-${v.condicion}">${v.condicion === 'nuevo' ? 'Nuevo' : 'Usado'}</span>` : ''}
-        <p class="card-desc">${esc(v.descripcion || 'Consulta disponibilidad y condiciones.')}</p>
+        <div class="card-name">${m(a.marca)} ${m(a.modelo)}<span class="card-year">${a.anio}</span></div>
+        ${y&&a.condicion?`<span class="card-condicion card-condicion-${a.condicion}">${a.condicion==="nuevo"?"Nuevo":"Usado"}</span>`:""}
+        <p class="card-desc">${m(a.descripcion||"Consulta disponibilidad y condiciones.")}</p>
       </div>
       <div class="card-footer">
-        <div class="card-price">${precioHtml}</div>
+        <div class="card-price">${u}</div>
         <div class="card-actions">
-          <button class="card-btn card-btn-detail" onclick="openModal(${v.id},'${v.origen}')">Ver</button>
-          ${!esCliente ? adminBtns : ''}
+          <button class="card-btn card-btn-detail" onclick="openModal(${a.id},'${a.origen}')">Ver</button>
+          ${y?"":f}
         </div>
       </div>
-    </article>`;
-  }).join('');
-}
-
-function buildCardImage(v) {
-  if (v.imagen)
-    return `<img class="card-img" src="/img/${esc(v.imagen)}"
-                 alt="${esc(v.marca)} ${esc(v.modelo)}" loading="lazy" />`;
-  return `<div class="card-img-placeholder">
-            <span class="ph-icon">🚗</span>
-            <span>${esc(v.marca)} ${esc(v.modelo)}</span>
-          </div>`;
-}
-
-// ══════════════════════════════════════════════════
-// FILTROS Y ORDENAMIENTO
-// ══════════════════════════════════════════════════
-
-function initFilters() {
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const tipo     = btn.dataset.tipo || '';
-      isParticulares = tipo === '__particulares__';
-      activeFilter   = isParticulares ? '' : tipo;
-      showingAll     = false;
-      sortPrecio = ''; sortAnio = ''; filterMarca = '';
-      ['sortPrecio', 'sortAnio', 'filterMarca'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) { el.value = ''; el.classList.remove('active-filter'); }
-      });
-      updateClearBtn();
-      const sb = document.getElementById('sortBar');
-      if (sb) sb.style.display = isParticulares ? 'none' : '';
-      loadVehicles();
-    });
-  });
-}
-
-function populateMarcaSelect() {
-  const sel = document.getElementById('filterMarca');
-  if (!sel) return;
-  const current = sel.value;
-  const marcas  = [...new Set(allVehicles.map(v => v.marca))].sort();
-  sel.innerHTML  = '<option value="">Todas</option>' +
-    marcas.map(m => `<option value="${esc(m)}"${m === current ? ' selected' : ''}>${esc(m)}</option>`).join('');
-}
-
-function initSortBar() {
-  updateClearBtn();
-}
-
-function applySort() {
-  if (isParticulares) { renderVehicles(allParticulares); return; }
-
-  sortPrecio  = document.getElementById('sortPrecio')?.value  || '';
-  sortAnio    = document.getElementById('sortAnio')?.value    || '';
-  filterMarca = document.getElementById('filterMarca')?.value || '';
-
-  ['sortPrecio', 'sortAnio', 'filterMarca'].forEach(id => {
-    document.getElementById(id)?.classList.toggle('active-filter',
-      !!(id === 'sortPrecio' ? sortPrecio : id === 'sortAnio' ? sortAnio : filterMarca));
-  });
-  updateClearBtn();
-
-  let list = [...allVehicles];
-  if (filterMarca) list = list.filter(v => v.marca === filterMarca);
-
-  if (sortPrecio) {
-    const F = 60; // factor DOP≈USD referencial solo para ordenamiento
-    list.sort((a, b) => {
-      const pa = (a.oferta && a.precio_oferta ? a.precio_oferta : a.precio) * (a.moneda === 'USD' ? F : 1);
-      const pb = (b.oferta && b.precio_oferta ? b.precio_oferta : b.precio) * (b.moneda === 'USD' ? F : 1);
-      return sortPrecio === 'desc' ? pb - pa : pa - pb;
-    });
-  } else if (sortAnio) {
-    list.sort((a, b) => sortAnio === 'desc' ? b.anio - a.anio : a.anio - b.anio);
-  }
-
-  renderVehicles(list);
-}
-
-function updateClearBtn() {
-  const btn = document.getElementById('sortClearBtn');
-  if (btn) btn.style.display = (sortPrecio || sortAnio || filterMarca) ? 'flex' : 'none';
-}
-
-function clearSort() {
-  sortPrecio = ''; sortAnio = ''; filterMarca = '';
-  ['sortPrecio', 'sortAnio', 'filterMarca'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.value = ''; el.classList.remove('active-filter'); }
-  });
-  updateClearBtn();
-  renderVehicles(allVehicles.filter(v => v.origen !== 'cliente'));
-}
-
-// ── Mostrar más / Mostrar menos ───────────────────
-function toggleShowMore() {
-  showingAll = !showingAll;
-  if (isParticulares) { renderVehicles(allParticulares); }
-  else { applySort(); }
-  if (!showingAll) {
-    document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-}
-window.toggleShowMore = toggleShowMore;
-
-// ══════════════════════════════════════════════════
-// MODAL DETALLE — galería de hasta 7 fotos
-// ══════════════════════════════════════════════════
-
-function openModal(id, origen) {
-  // Usar origen para evitar colisión de IDs entre dealer y clientes
-  const lista = (origen === 'cliente') ? allParticulares : allVehicles;
-  const v = lista.find(x => x.id === id);
-  if (!v) return;
-
-  const moneda     = v.moneda || 'DOP';
-  const extras     = Array.isArray(v.imagenes_extra) ? v.imagenes_extra : [];
-  const todasFotos = [];
-  if (v.imagen) todasFotos.push(v.imagen);
-  extras.forEach(e => { if (e) todasFotos.push(e); });
-
-  let galeriaHtml = '';
-  if (!todasFotos.length) {
-    galeriaHtml = `<div class="modal-img-ph">🚗</div>`;
-  } else if (todasFotos.length === 1) {
-    galeriaHtml = `<img class="modal-img"
-                        src="/img/${esc(todasFotos[0])}"
-                        alt="${esc(v.marca)} ${esc(v.modelo)}" />`;
-  } else {
-    galeriaHtml = `
+    </article>`}).join("")}function Xe(){document.querySelectorAll(".filter-btn").forEach(e=>{e.addEventListener("click",()=>{document.querySelectorAll(".filter-btn").forEach(i=>i.classList.remove("active")),e.classList.add("active");const t=e.dataset.tipo||"",n=t==="__particulares__";Ce(n),Ae(n?"":t),z(!1),j(""),H(""),W(""),["sortPrecio","sortAnio","filterMarca"].forEach(i=>{const c=document.getElementById(i);c&&(c.value="",c.classList.remove("active-filter"))}),N();const o=document.getElementById("sortBar");o&&(o.style.display=n?"none":""),O()})})}function Ye(){const e=document.getElementById("filterMarca");if(!e)return;const t=e.value,n=[...new Set(I.map(o=>o.marca))].sort();e.innerHTML='<option value="">Todas</option>'+n.map(o=>`<option value="${m(o)}"${o===t?" selected":""}>${m(o)}</option>`).join("")}function Qe(){N()}function me(){var i,c,s;if(v){P(k);return}const e=((i=document.getElementById("sortPrecio"))==null?void 0:i.value)||"",t=((c=document.getElementById("sortAnio"))==null?void 0:c.value)||"",n=((s=document.getElementById("filterMarca"))==null?void 0:s.value)||"";j(e),H(t),W(n),["sortPrecio","sortAnio","filterMarca"].forEach(a=>{var r;(r=document.getElementById(a))==null||r.classList.toggle("active-filter",!!(a==="sortPrecio"?e:a==="sortAnio"?t:n))}),N();let o=[...I];n&&(o=o.filter(a=>a.marca===n)),e?o.sort((r,d)=>{const u=(r.oferta&&r.precio_oferta?r.precio_oferta:r.precio)*(r.moneda==="USD"?60:1),f=(d.oferta&&d.precio_oferta?d.precio_oferta:d.precio)*(d.moneda==="USD"?60:1);return e==="desc"?f-u:u-f}):t&&o.sort((a,r)=>t==="desc"?r.anio-a.anio:a.anio-r.anio),P(o)}function N(){const e=document.getElementById("sortClearBtn");e&&(e.style.display=ce||se||re?"flex":"none")}function Ze(){j(""),H(""),W(""),["sortPrecio","sortAnio","filterMarca"].forEach(e=>{const t=document.getElementById(e);t&&(t.value="",t.classList.remove("active-filter"))}),N(),P(I.filter(e=>e.origen!=="cliente"))}function et(){var e;z(!S),v?P(k):me(),S||(e=document.getElementById("catalogo"))==null||e.scrollIntoView({behavior:"smooth",block:"start"})}async function tt(){}async function G(){try{const e=await Ve();if(xe(e),!$.length)return;const t=document.getElementById("ofertas-section");t&&(t.style.display=""),nt(),ue()}catch{}}function nt(){const e=document.getElementById("sliderTrack"),t=document.getElementById("sliderDots");if(!e||!t)return;e.innerHTML=$.map((i,c)=>{const s=i.moneda||"DOP",a=i.imagen?`<img class="slide-img" src="/img/${m(i.imagen)}"
+              alt="${m(i.marca)} ${m(i.modelo)}" loading="lazy" />`:'<div class="slide-img-ph">🚗</div>',r=i.precio_oferta?`<div class="slide-prices">
+           <span class="slide-price-old">${b(i.precio,s)}</span>
+           <span class="slide-price-new">${b(i.precio_oferta,s)}</span>
+         </div>`:`<div class="slide-prices">
+           <span class="slide-price-new">${b(i.precio,s)}</span>
+         </div>`;return`
+      <div class="slide-item${c===0?" active":""}" data-index="${c}">
+        <div class="slide-img-wrap">${a}<div class="slide-overlay"></div></div>
+        <div class="slide-info">
+          <span class="slide-badge">OFERTA ESPECIAL</span>
+          <h3 class="slide-name">${m(i.marca)} ${m(i.modelo)}</h3>
+          <p class="slide-year">${i.anio} · ${m(i.tipo)}</p>
+          ${r}
+          <button class="slide-cta" onclick="openModalFromSlider(${i.id})">Ver detalles</button>
+        </div>
+      </div>`}).join(""),t.innerHTML=$.map((i,c)=>`<button class="slider-dot${c===0?" active":""}" onclick="goToSlide(${c})" aria-label="Slide ${c+1}"></button>`).join("");const n=document.getElementById("sliderPrev"),o=document.getElementById("sliderNext");if(n){const i=n.cloneNode(!0);n.replaceWith(i),i.addEventListener("click",()=>{D((L-1+$.length)%$.length),ne()})}if(o){const i=o.cloneNode(!0);o.replaceWith(i),i.addEventListener("click",()=>{D((L+1)%$.length),ne()})}}function D(e){var t,n,o,i;(t=document.querySelectorAll(".slide-item")[L])==null||t.classList.remove("active"),(n=document.querySelectorAll(".slider-dot")[L])==null||n.classList.remove("active"),Te(e),(o=document.querySelectorAll(".slide-item")[L])==null||o.classList.add("active"),(i=document.querySelectorAll(".slider-dot")[L])==null||i.classList.add("active")}function ue(){Pe(setInterval(()=>{D((L+1)%$.length)},Le))}function ne(){V&&clearInterval(V),ue()}function ot(){const e=document.getElementById("menuToggle"),t=document.getElementById("mobileNav");!e||!t||e.addEventListener("click",()=>{const n=t.classList.toggle("open");e.classList.toggle("open",n)})}function it(){const e=document.getElementById("secretTrigger");if(!e)return;let t=0,n;e.addEventListener("click",()=>{t++,e.classList.add("lit"),clearTimeout(n),n=setTimeout(()=>{t=0,e.classList.remove("lit")},3e3),t>=5&&(t=0,clearTimeout(n),e.classList.remove("lit"),window.location.href="/login")})}function oe(e,t){if(!e||!t)return;let n=0;const o=Math.max(1,Math.ceil(t/20)),i=setInterval(()=>{n=Math.min(n+o,t),e.textContent=String(n),n>=t&&clearInterval(i)},40)}async function at(){try{const e=await Ue();oe(document.getElementById("statVehiculos"),e.dealer||0),oe(document.getElementById("statParticulares"),e.particulares||0)}catch{}}function ct(){const e=document.getElementById("fImagenesExtra");e&&(e.setAttribute("multiple",""),e.addEventListener("change",()=>{Array.from(e.files||[]).forEach(n=>{A.find(o=>o.name===n.name&&o.size===n.size)||A.push(n)}),fe(),e.value=""}))}function fe(){let e=document.getElementById("fotoPendingPreview");if(!e){const o=document.getElementById("fImagenesExtra");if(!o)return;e=document.createElement("div"),e.id="fotoPendingPreview",e.className="foto-preview-grid",e.style.marginTop="10px",o.parentNode.insertBefore(e,o.nextSibling)}let t=document.getElementById("fotosCount");if(!t){t=document.createElement("p"),t.id="fotosCount",t.className="fotos-count";const o=document.getElementById("fotoPendingPreview");o&&o.parentNode.insertBefore(t,o.nextSibling)}e.innerHTML=A.map((o,i)=>`<div class="foto-preview-item">
+      <img src="${URL.createObjectURL(o)}" alt="Nueva foto ${i+1}" />
+      <button type="button" class="foto-preview-del" onclick="removePendingFile(${i})" aria-label="Quitar foto">✕</button>
+    </div>`).join("");const n=M.length+A.length;t.textContent=n>0?`${n} foto${n!==1?"s":""} en total`:"",t.className="fotos-count",K()}function st(e){A.splice(e,1),fe()}function K(){try{const e=new DataTransfer;A.forEach(n=>e.items.add(n));const t=document.getElementById("fImagenesExtra");t&&(t.files=e.files)}catch{}}let h=null,p=null,w={},C=0,T=[],J=1.6;function ie(){document.querySelectorAll('input[type="file"][data-crop]').forEach(rt)}function rt(e){e._cropBound||(e._cropBound=!0,e.addEventListener("change",function(){const t=Array.from(this.files||[]);if(!t.length)return;const n=parseFloat(this.dataset.ratio||"1.6")||1.6;J=n,ge(n);const o=document.getElementById("cropRatioBtns");o&&(o.style.display=this.dataset.hideRatio?"none":""),p=e,w[e.id]=w[e.id]||[],T=t,C=0,pe(t[0])}))}function pe(e){const t=new FileReader;t.onload=function(n){const o=document.getElementById("cropImg");o.src=n.target.result,document.getElementById("cropOverlay").classList.add("open"),document.body.style.overflow="hidden",setTimeout(()=>{h&&(h.destroy(),h=null);const c=window.Cropper;c&&(h=new c(o,{aspectRatio:J||NaN,viewMode:1,dragMode:"move",autoCropArea:.88,responsive:!0,restore:!1,guides:!0,center:!0,highlight:!1,cropBoxMovable:!0,cropBoxResizable:!0,toggleDragModeOnDblclick:!1}))},80)},t.readAsDataURL(e)}function lt(e,t){J=e,h&&h.setAspectRatio(e||NaN),ge(e)}function ge(e){document.querySelectorAll(".crop-ratio-btn").forEach(t=>{t.classList.toggle("active",parseFloat(t.dataset.ratio||"0")===e)})}function dt(){if(!h||!p)return;h.getCroppedCanvas({maxWidth:1600,maxHeight:1600}).toBlob(function(t){if(!t||!p)return;const n=T[C].name.replace(/\.[^.]+$/,"")+".jpg",o=new File([t],n,{type:"image/jpeg"});w[p.id]||(w[p.id]=[]),w[p.id].push(o),C++,C<T.length?pe(T[C]):(ut(p,w[p.id]),ye(),ft(p,w[p.id]),w[p.id]=[])},"image/jpeg",.82)}function mt(){p&&(p.value=""),ye()}function ye(){h&&(h.destroy(),h=null);const e=document.getElementById("cropOverlay");e==null||e.classList.remove("open"),document.body.style.overflow="",p=null,T=[],C=0}function ut(e,t){try{const n=new DataTransfer;t.forEach(o=>n.items.add(o)),e.files=n.files}catch{e._croppedFiles=t}}function ft(e,t){const n=e.id+"_preview";let o=document.getElementById(n);o||(o=document.createElement("div"),o.id=n,o.className="crop-previews",e.parentNode.insertBefore(o,e.nextSibling)),o.innerHTML="",t.forEach((i,c)=>{const s=URL.createObjectURL(i),a=document.createElement("div");a.className="crop-preview-item",a.innerHTML=`
+      <img src="${s}" alt="Vista previa ${c+1}" />
+      <span class="crop-preview-badge">✓ Recortada</span>
+    `,o.appendChild(a)})}function pt(){document.addEventListener("DOMContentLoaded",ie),new MutationObserver(()=>ie()).observe(document.body,{childList:!0,subtree:!0})}let g=null,F=0;function ve(e,t){const o=(t==="cliente"?k:I).find(d=>d.id===e);if(!o)return;const i=o.moneda||"DOP",c=Array.isArray(o.imagenes_extra)?o.imagenes_extra:[],s=[];o.imagen&&s.push(o.imagen),c.forEach(d=>{d&&s.push(d)});let a="";s.length?s.length===1?a=`<img class="modal-img"
+                        src="/img/${m(s[0])}"
+                        alt="${m(o.marca)} ${m(o.modelo)}" />`:a=`
       <div class="modal-gallery">
         <div class="mg-main-wrap">
           <img class="mg-main-img" id="mgMain"
-               src="/img/${esc(todasFotos[0])}"
-               alt="${esc(v.marca)} ${esc(v.modelo)}" />
+               src="/img/${m(s[0])}"
+               alt="${m(o.marca)} ${m(o.modelo)}" />
           <button class="mg-arrow mg-arrow-l" onclick="mgPrev()" aria-label="Anterior">&#8592;</button>
           <button class="mg-arrow mg-arrow-r" onclick="mgNext()" aria-label="Siguiente">&#8594;</button>
-          <div class="mg-counter"><span id="mgCurrent">1</span>/${todasFotos.length}</div>
+          <div class="mg-counter"><span id="mgCurrent">1</span>/${s.length}</div>
         </div>
         <div class="mg-thumbs" id="mgThumbs">
-          ${todasFotos.map((f, i) => `
-            <button class="mg-thumb${i === 0 ? ' active' : ''}" onclick="mgGoTo(${i})" aria-label="Foto ${i+1}">
-              <img src="/img/${esc(f)}" alt="Foto ${i+1}" loading="lazy" />
-            </button>`).join('')}
+          ${s.map((d,u)=>`
+            <button class="mg-thumb${u===0?" active":""}" onclick="mgGoTo(${u})" aria-label="Foto ${u+1}">
+              <img src="/img/${m(d)}" alt="Foto ${u+1}" loading="lazy" />
+            </button>`).join("")}
         </div>
-      </div>`;
-  }
-
-  const precioHtml = (v.oferta && v.precio_oferta)
-    ? `<p class="modal-price">
-         <span class="modal-price-original">${fmtMoneda(v.precio, moneda)}</span>
-         ${fmtMoneda(v.precio_oferta, moneda)}
-       </p>`
-    : `<p class="modal-price">${fmtMoneda(v.precio, moneda)}</p>`;
-
-  document.getElementById('modalContent').innerHTML = `
-    ${galeriaHtml}
+      </div>`:a='<div class="modal-img-ph">🚗</div>';const r=o.oferta&&o.precio_oferta?`<p class="modal-price">
+         <span class="modal-price-original">${b(o.precio,i)}</span>
+         ${b(o.precio_oferta,i)}
+       </p>`:`<p class="modal-price">${b(o.precio,i)}</p>`;document.getElementById("modalContent").innerHTML=`
+    ${a}
     <div class="modal-body">
-      ${v.oferta ? '<span class="modal-oferta-tag">OFERTA</span>' : ''}
+      ${o.oferta?'<span class="modal-oferta-tag">OFERTA</span>':""}
       <div class="modal-tipo-row">
-        <p class="modal-tipo">${esc(v.tipo)}</p>
-        <span class="modal-moneda-badge modal-moneda-${moneda.toLowerCase()}">${moneda}</span>
+        <p class="modal-tipo">${m(o.tipo)}</p>
+        <span class="modal-moneda-badge modal-moneda-${i.toLowerCase()}">${i}</span>
       </div>
-      <h2 class="modal-title">${esc(v.marca)} ${esc(v.modelo)}</h2>
-      <p class="modal-year">Año ${v.anio}</p>
-      <p class="modal-desc">${esc(v.descripcion || 'Consulta disponibilidad y financiamiento.')}</p>
-      ${precioHtml}
-      ${v.origen === 'cliente' && v.nombre_vendedor ? `
+      <h2 class="modal-title">${m(o.marca)} ${m(o.modelo)}</h2>
+      <p class="modal-year">Año ${o.anio}</p>
+      <p class="modal-desc">${m(o.descripcion||"Consulta disponibilidad y financiamiento.")}</p>
+      ${r}
+      ${o.origen==="cliente"&&o.nombre_vendedor?`
         <div class="modal-vendedor">
           <p class="modal-vendedor-label">Vendedor particular</p>
-          <p class="modal-vendedor-nombre">${esc(v.nombre_vendedor)}</p>
+          <p class="modal-vendedor-nombre">${m(o.nombre_vendedor)}</p>
         </div>
         <div class="modal-cta">
-          ${v.whatsapp_vendedor
-            ? `<a href="https://wa.me/${v.whatsapp_vendedor.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('Hola ' + v.nombre_vendedor + ', vi tu ' + v.marca + ' ' + v.modelo + ' ' + v.anio + ' en KingsDealer')}" class="btn-primary" target="_blank" rel="noopener">WhatsApp vendedor</a>`
-            : ''}
-          <a href="tel:${v.telefono_vendedor}" class="btn-ghost" style="color:#333;border-color:#ccc;">Llamar: ${esc(v.telefono_vendedor)}</a>
-        </div>` : `
+          ${o.whatsapp_vendedor?`<a href="https://wa.me/${o.whatsapp_vendedor.replace(/[^0-9]/g,"")}?text=${encodeURIComponent("Hola "+o.nombre_vendedor+", vi tu "+o.marca+" "+o.modelo+" "+o.anio+" en KingsDealer")}" class="btn-primary" target="_blank" rel="noopener">WhatsApp vendedor</a>`:""}
+          <a href="tel:${o.telefono_vendedor}" class="btn-ghost" style="color:#333;border-color:#ccc;">Llamar: ${m(o.telefono_vendedor)}</a>
+        </div>`:`
         <div class="modal-cta">
-          <a href="https://wa.me/18091234567?text=${encodeURIComponent('Hola, me interesa el ' + v.marca + ' ' + v.modelo + ' ' + v.anio)}"
+          <a href="https://wa.me/18091234567?text=${encodeURIComponent("Hola, me interesa el "+o.marca+" "+o.modelo+" "+o.anio)}"
              class="btn-primary" target="_blank" rel="noopener">WhatsApp</a>
           <a href="tel:+18091234567" class="btn-ghost" style="color:#333;border-color:#ccc;">Llamar</a>
         </div>`}
-    </div>`;
-
-  window._mgFotos  = todasFotos.length > 1 ? todasFotos : null;
-  window._mgActual = 0;
-
-  document.getElementById('modalOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function mgGoTo(idx) {
-  const fotos = window._mgFotos;
-  if (!fotos?.length) return;
-  window._mgActual = idx;
-  const main   = document.getElementById('mgMain');
-  const curr   = document.getElementById('mgCurrent');
-  const thumbs = document.querySelectorAll('.mg-thumb');
-  if (main)  main.src = `/img/${esc(fotos[idx])}`;
-  if (curr)  curr.textContent = idx + 1;
-  thumbs.forEach((t, i) => t.classList.toggle('active', i === idx));
-}
-function mgPrev() {
-  const f = window._mgFotos;
-  if (f) mgGoTo((window._mgActual - 1 + f.length) % f.length);
-}
-function mgNext() {
-  const f = window._mgFotos;
-  if (f) mgGoTo((window._mgActual + 1) % f.length);
-}
-
-function closeModal() {
-  document.getElementById('modalOverlay')?.classList.remove('open');
-  document.body.style.overflow = '';
-  window._mgFotos  = null;
-  window._mgActual = 0;
-}
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape')      closeModal();
-  if (e.key === 'ArrowLeft'  && window._mgFotos) mgPrev();
-  if (e.key === 'ArrowRight' && window._mgFotos) mgNext();
-});
-
-// ══════════════════════════════════════════════════
-// SLIDER DE OFERTAS
-// ══════════════════════════════════════════════════
-
-let sliderOffers   = [];
-let sliderIndex    = 0;
-let sliderAutoplay = null;
-const SLIDE_MS     = 4500;
-
-async function loadOfertas() {
-  try {
-    const res = await fetch('/api/ofertas');
-    if (!res.ok) return;
-    sliderOffers = await res.json();
-    if (!sliderOffers.length) return;
-    const section = document.getElementById('ofertas-section');
-    if (section) section.style.display = '';
-    buildSlider();
-    startAutoplay();
-  } catch { /* silencioso */ }
-}
-
-function buildSlider() {
-  const track = document.getElementById('sliderTrack');
-  const dots  = document.getElementById('sliderDots');
-  if (!track || !dots) return;
-
-  track.innerHTML = sliderOffers.map((v, i) => {
-    const moneda = v.moneda || 'DOP';
-    const img    = v.imagen
-      ? `<img class="slide-img" src="/img/${esc(v.imagen)}"
-              alt="${esc(v.marca)} ${esc(v.modelo)}" loading="lazy" />`
-      : `<div class="slide-img-ph">🚗</div>`;
-    const precio = v.precio_oferta
-      ? `<div class="slide-prices">
-           <span class="slide-price-old">${fmtMoneda(v.precio, moneda)}</span>
-           <span class="slide-price-new">${fmtMoneda(v.precio_oferta, moneda)}</span>
-         </div>`
-      : `<div class="slide-prices">
-           <span class="slide-price-new">${fmtMoneda(v.precio, moneda)}</span>
-         </div>`;
-    return `
-      <div class="slide-item${i === 0 ? ' active' : ''}" data-index="${i}">
-        <div class="slide-img-wrap">${img}<div class="slide-overlay"></div></div>
-        <div class="slide-info">
-          <span class="slide-badge">OFERTA ESPECIAL</span>
-          <h3 class="slide-name">${esc(v.marca)} ${esc(v.modelo)}</h3>
-          <p class="slide-year">${v.anio} · ${esc(v.tipo)}</p>
-          ${precio}
-          <button class="slide-cta" onclick="openModalFromSlider(${v.id})">Ver detalles</button>
-        </div>
-      </div>`;
-  }).join('');
-
-  dots.innerHTML = sliderOffers.map((_, i) =>
-    `<button class="slider-dot${i === 0 ? ' active' : ''}" onclick="goToSlide(${i})" aria-label="Slide ${i+1}"></button>`
-  ).join('');
-
-  // Registra listeners solo una vez — clona para evitar duplicados
-  const prev = document.getElementById('sliderPrev');
-  const next = document.getElementById('sliderNext');
-  if (prev) { const np = prev.cloneNode(true); prev.replaceWith(np); np.addEventListener('click', () => { goToSlide((sliderIndex - 1 + sliderOffers.length) % sliderOffers.length); resetAutoplay(); }); }
-  if (next) { const nn = next.cloneNode(true); next.replaceWith(nn); nn.addEventListener('click', () => { goToSlide((sliderIndex + 1) % sliderOffers.length); resetAutoplay(); }); }
-}
-
-function goToSlide(idx) {
-  document.querySelectorAll('.slide-item')[sliderIndex]?.classList.remove('active');
-  document.querySelectorAll('.slider-dot')[sliderIndex]?.classList.remove('active');
-  sliderIndex = idx;
-  document.querySelectorAll('.slide-item')[sliderIndex]?.classList.add('active');
-  document.querySelectorAll('.slider-dot')[sliderIndex]?.classList.add('active');
-}
-
-function startAutoplay()  { sliderAutoplay = setInterval(() => goToSlide((sliderIndex + 1) % sliderOffers.length), SLIDE_MS); }
-function resetAutoplay()  { clearInterval(sliderAutoplay); startAutoplay(); }
-
-function openModalFromSlider(id) {
-  // Slider solo tiene vehículos del dealer (ofertas)
-  if (!allVehicles.find(x => x.id === id)) {
-    const v = sliderOffers.find(x => x.id === id);
-    if (v) allVehicles = [...allVehicles, v];
-  }
-  openModal(id, 'dealer');
-}
-
-// ══════════════════════════════════════════════════
-// ADMIN — FORMULARIO VEHÍCULO
-// ══════════════════════════════════════════════════
-
-function togglePrecioOferta(checkbox) {
-  const hidden = document.getElementById('fOfertaHidden');
-  const wrap   = document.getElementById('precioOfertaWrap');
-  if (hidden) hidden.value = checkbox.checked ? '1' : '0';
-  if (wrap)   wrap.style.display = checkbox.checked ? 'block' : 'none';
-}
-
-function toggleForm() {
-  const wrap = document.getElementById('vehicleFormWrap');
-  const btn  = document.getElementById('toggleFormBtn');
-  if (!wrap) return;
-  const open = wrap.style.display === 'none' || wrap.style.display === '';
-  wrap.style.display = open ? 'block' : 'none';
-  if (btn) btn.textContent = open ? '✕ Cerrar formulario' : '+ Agregar vehículo';
-  if (!open) resetForm();
-}
-
-function resetForm() {
-  editingId    = null;
-  keepImages   = [];
-  pendingFiles = [];
-
-  // Limpiar preview de foto principal (evita que aparezca en el siguiente vehículo)
-  const fImagen = document.getElementById('fImagen');
-  if (fImagen) {
-    fImagen.value = '';
-    const prevCrop = fImagen.parentNode?.querySelector('.crop-previews');
-    if (prevCrop) prevCrop.innerHTML = '';
-  }
-  const fExtra = document.getElementById('fImagenesExtra');
-  if (fExtra) fExtra.value = '';
-  const pprev = document.getElementById('fotoPendingPreview'); if (pprev) pprev.innerHTML = '';
-  const fcnt  = document.getElementById('fotosCount');         if (fcnt)  fcnt.textContent = '';
-
-  const form = document.getElementById('vehicleForm');
-  if (form) form.reset();
-
-  const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
-  const txt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-
-  set('editId', '');
-  set('fOfertaHidden', '0');
-  set('fMoneda', 'DOP');
-  txt('formTitle', 'Nuevo vehículo');
-  txt('submitBtn', 'Guardar vehículo');
-  txt('formError', '');
-
-  const wrap = document.getElementById('vehicleFormWrap');
-  if (wrap) wrap.style.display = 'none';
-  const toggleBtn = document.getElementById('toggleFormBtn');
-  if (toggleBtn) toggleBtn.textContent = '+ Agregar vehículo';
-  const pw = document.getElementById('precioOfertaWrap');
-  if (pw) pw.style.display = 'none';
-
-  renderImagenesExistentes([]);
-
-  // Sincronizar botones moneda (pueden existir o no según el rol)
-  syncMonedaBtns('DOP');
-}
-
-function editVehicle(id) {
-  const v = allVehicles.find(x => x.id === id);
-  if (!v) return;
-
-  editingId  = id;
-  keepImages = Array.isArray(v.imagenes_extra) ? [...v.imagenes_extra] : [];
-
-  const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
-  const txt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-
-  set('editId',          id);
-  set('fMarca',          v.marca);
-  set('fModelo',         v.modelo);
-  set('fAnio',           v.anio);
-  set('fTipo',           v.tipo);
-  set('fPrecio',         v.precio);
-  set('fDescripcion',    v.descripcion || '');
-  set('fOfertaHidden',   v.oferta ? '1' : '0');
-  set('fMoneda',         v.moneda || 'DOP');
-  set('fPrecioOferta',   v.precio_oferta || '');
-
-  const chk = document.getElementById('fOferta');
-  if (chk) {
-    chk.checked = !!v.oferta;
-    const pw = document.getElementById('precioOfertaWrap');
-    if (pw) pw.style.display = v.oferta ? 'block' : 'none';
-  }
-
-  txt('formTitle', `Editando: ${v.marca} ${v.modelo}`);
-  txt('submitBtn', 'Actualizar vehículo');
-  txt('formError', '');
-
-  syncMonedaBtns(v.moneda || 'DOP');
-  renderImagenesExistentes(keepImages);
-
-  const wrap = document.getElementById('vehicleFormWrap');
-  if (wrap) { wrap.style.display = 'block'; wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-  const toggleBtn = document.getElementById('toggleFormBtn');
-  if (toggleBtn) toggleBtn.textContent = '✕ Cerrar formulario';
-}
-
-// Sincroniza los botones DOP/USD del formulario admin
-// Función reutilizable desde aquí y desde el <script> inline del HTML
-function syncMonedaBtns(value) {
-  const btnDOP = document.getElementById('btnDOP');
-  const btnUSD = document.getElementById('btnUSD');
-  if (btnDOP) btnDOP.classList.toggle('active', value === 'DOP');
-  if (btnUSD) btnUSD.classList.toggle('active', value === 'USD');
-}
-
-// Expuesta globalmente para el onclick inline del HTML
-window.setMoneda = function(value) {
-  const el = document.getElementById('fMoneda');
-  if (el) el.value = value;
-  syncMonedaBtns(value);
-};
-
-function renderImagenesExistentes(lista) {
-  const cont = document.getElementById('imagenesExistentes');
-  if (!cont) return;
-  if (!lista.length) { cont.innerHTML = ''; cont.style.display = 'none'; return; }
-  cont.style.display = 'grid';
-  cont.className = 'imagenes-existentes foto-preview-grid';
-  cont.innerHTML = lista.map((nombre, i) => `
-    <div class="foto-preview-item" id="ithumb-${i}">
-      <img src="/img/${esc(nombre)}" alt="Foto ${i+1}" loading="lazy" />
-      <button type="button" class="foto-preview-del" onclick="eliminarFotoExistente(${i})" aria-label="Eliminar foto ${i+1}">✕</button>
-    </div>`).join('');
-}
-
-function eliminarFotoExistente(idx) {
-  keepImages.splice(idx, 1);
-  renderImagenesExistentes(keepImages);
-}
-
-async function submitVehicle(e) {
-  e.preventDefault();
-  const errEl = document.getElementById('formError');
-  const btn   = document.getElementById('submitBtn');
-  if (errEl) errEl.textContent = '';
-  if (btn)   { btn.disabled = true; btn.textContent = 'Guardando…'; }
-
-  const formData = new FormData(document.getElementById('vehicleForm'));
-  formData.set('imagenes_extra_keep', JSON.stringify(keepImages));
-
-  const peso = pesoTotalFotos(formData);
-  if (peso > MAX_UPLOAD_BYTES) {
-    if (errEl) errEl.textContent = `Las fotos pesan ${formatMB(peso)} MB en total (máx. ${formatMB(MAX_UPLOAD_BYTES)} MB). Quita alguna foto e intenta de nuevo.`;
-    if (btn) { btn.disabled = false; btn.textContent = editingId ? 'Actualizar vehículo' : 'Guardar vehículo'; }
-    return;
-  }
-
-  try {
-    const isEdit = !!editingId;
-    const res    = await fetch(
-      isEdit ? `/api/vehiculos/${editingId}` : '/api/vehiculos',
-      { method: isEdit ? 'PUT' : 'POST', body: formData }
-    );
-    const data = await res.json();
-    if (!res.ok) {
-      if (errEl) errEl.textContent = data.error || 'Error al guardar.';
-    } else {
-      showToast(isEdit ? '✅ Vehículo actualizado' : '✅ Vehículo agregado', 'success');
-      resetForm();
-      await Promise.all([loadVehicles(), loadOfertas()]);
-    }
-  } catch {
-    if (errEl) errEl.textContent = 'Error de conexión.';
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = editingId ? 'Actualizar vehículo' : 'Guardar vehículo'; }
-  }
-}
-
-async function deleteVehicle(id) {
-  const v = allVehicles.find(x => x.id === id);
-  if (!v || !confirm(`¿Eliminar "${v.marca} ${v.modelo}"? Esta acción no se puede deshacer.`)) return;
-  try {
-    const res = await fetch(`/api/vehiculos/${id}`, { method: 'DELETE' });
-    if (res.ok) {
-      showToast('🗑 Vehículo eliminado', 'success');
-      await Promise.all([loadVehicles(), loadOfertas()]);
-    } else {
-      showToast('Error al eliminar', 'error');
-    }
-  } catch { showToast('Error de conexión', 'error'); }
-}
-
-// ══════════════════════════════════════════════════
-// MOBILE NAV
-// ══════════════════════════════════════════════════
-
-function initMobileNav() {
-  const toggle = document.getElementById('menuToggle');
-  const nav    = document.getElementById('mobileNav');
-  if (!toggle || !nav) return;
-  toggle.addEventListener('click', () => {
-    const open = nav.classList.toggle('open');
-    toggle.classList.toggle('open', open);
-  });
-}
-
-function closeMobile() {
-  document.getElementById('mobileNav')?.classList.remove('open');
-  document.getElementById('menuToggle')?.classList.remove('open');
-}
-
-// ══════════════════════════════════════════════════
-// TRIGGER SECRETO (5 clics en © → /login)
-// ══════════════════════════════════════════════════
-
-function initSecretTrigger() {
-  const trigger = document.getElementById('secretTrigger');
-  if (!trigger) return;
-  let clicks = 0, timeout;
-  trigger.addEventListener('click', () => {
-    clicks++;
-    trigger.classList.add('lit');
-    clearTimeout(timeout);
-    timeout = setTimeout(() => { clicks = 0; trigger.classList.remove('lit'); }, 3000);
-    if (clicks >= 5) {
-      clicks = 0; clearTimeout(timeout);
-      trigger.classList.remove('lit');
-      window.location.href = '/login';
-    }
-  });
-}
-
-// ══════════════════════════════════════════════════
-// CONTADOR HERO
-// ══════════════════════════════════════════════════
-
-function animateCount(el, target) {
-  if (!el || !target) return;
-  let current = 0;
-  const step  = Math.max(1, Math.ceil(target / 20));
-  const timer = setInterval(() => {
-    current = Math.min(current + step, target);
-    el.textContent = current;
-    if (current >= target) clearInterval(timer);
-  }, 40);
-}
-
-async function updateStatCount() {
-  try {
-    const res  = await fetch('/api/count');
-    if (!res.ok) return;
-    const data = await res.json();
-    animateCount(document.getElementById('statVehiculos'),    data.dealer      || 0);
-    animateCount(document.getElementById('statParticulares'), data.particulares || 0);
-  } catch {}
-}
-
-// ══════════════════════════════════════════════════
-// UTILIDADES
-// ══════════════════════════════════════════════════
-
-function esc(str) {
-  if (str == null) return '';
-  return String(str)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-}
-
-function formatPrice(n) {
-  return Number(n).toLocaleString('es-DO');
-}
-
-let _toastTimer;
-function showToast(msg, type = '') {
-  const toast = document.getElementById('toast');
-  if (!toast) return;
-  clearTimeout(_toastTimer);
-  toast.textContent = msg;
-  toast.className   = `toast show${type ? ' ' + type : ''}`;
-  _toastTimer = setTimeout(() => { toast.className = 'toast'; }, 3200);
-}
-// Exponer globalmente para uso desde scripts inline
-window.showToast = showToast;
-
-// ══════════════════════════════════════════════════
-// PREVIEW DE FOTOS NUEVAS — sin límite fijo
-// Aplica al panel admin Y al formulario de vendedor
-// (ambos usan el id "fImagenesExtra")
-// ══════════════════════════════════════════════════
-
-// Almacena los File objects seleccionados por el usuario (nuevas fotos)
-let pendingFiles = [];
-
-function initFotoPreview() {
-  // Aplica para el input del admin panel y del formulario de vendedor (mismo id)
-  const input = document.getElementById('fImagenesExtra');
-  if (!input) return;
-
-  // Asegurarse de que el input tenga el atributo multiple
-  input.setAttribute('multiple', '');
-
-  input.addEventListener('change', () => {
-    const newFiles = Array.from(input.files);
-    // Acumular — no reemplazar — para permitir selecciones múltiples en iOS/Safari
-    newFiles.forEach(f => { if (!pendingFiles.find(p => p.name === f.name && p.size === f.size)) pendingFiles.push(f); });
-    renderPendingPreviews();
-    // Limpiar input para permitir re-selección del mismo archivo
-    input.value = '';
-  });
-}
-window.initFotoPreview = initFotoPreview;
-
-function renderPendingPreviews() {
-  let previewCont = document.getElementById('fotoPendingPreview');
-  if (!previewCont) {
-    const input = document.getElementById('fImagenesExtra');
-    if (!input) return;
-    previewCont = document.createElement('div');
-    previewCont.id = 'fotoPendingPreview';
-    previewCont.className = 'foto-preview-grid';
-    previewCont.style.marginTop = '10px';
-    input.parentNode.insertBefore(previewCont, input.nextSibling);
-  }
-
-  let countEl = document.getElementById('fotosCount');
-  if (!countEl) {
-    countEl = document.createElement('p');
-    countEl.id = 'fotosCount';
-    countEl.className = 'fotos-count';
-    const previewCont2 = document.getElementById('fotoPendingPreview');
-    if (previewCont2) previewCont2.parentNode.insertBefore(countEl, previewCont2.nextSibling);
-  }
-
-  previewCont.innerHTML = pendingFiles.map((f, i) => {
-    const url = URL.createObjectURL(f);
-    return `<div class="foto-preview-item">
-      <img src="${url}" alt="Nueva foto ${i+1}" />
-      <button type="button" class="foto-preview-del" onclick="removePendingFile(${i})" aria-label="Quitar foto">✕</button>
-    </div>`;
-  }).join('');
-
-  const total = keepImages.length + pendingFiles.length;
-  countEl.textContent = total > 0 ? `${total} foto${total !== 1 ? 's' : ''} en total` : '';
-  countEl.className   = 'fotos-count';
-
-  // Sincronizar un DataTransfer con el input para que FormData envíe todos los archivos
-  syncFilesToInput();
-}
-
-function removePendingFile(idx) {
-  pendingFiles.splice(idx, 1);
-  renderPendingPreviews();
-}
-window.removePendingFile = removePendingFile;
-
-function syncFilesToInput() {
-  // Rebuild the file input's FileList from pendingFiles using DataTransfer
-  try {
-    const dt = new DataTransfer();
-    pendingFiles.forEach(f => dt.items.add(f));
-    const input = document.getElementById('fImagenesExtra');
-    if (input) input.files = dt.files;
-  } catch (e) {
-    // DataTransfer not supported on older browsers — files sent normally
-  }
-}
-
-// ══════════════════════════════════════════════════
-// FORMULARIO DE VENDEDOR PARTICULAR (/vender)
-// Submit con soporte de múltiples fotos
-// ══════════════════════════════════════════════════
-
-function initVendedorForm() {
-  const form = document.getElementById('anuncioForm');
-  if (!form) return;
-
-  // Inicializar preview de fotos también en el form de vendedor
-  initFotoPreview();
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const errEl = document.getElementById('anuncioError');
-    const btn   = document.getElementById('anuncioSubmitBtn');
-    if (errEl) errEl.textContent = '';
-    if (btn)   { btn.disabled = true; btn.textContent = 'Enviando…'; }
-
-    // Sincronizar archivos pendientes al input antes de crear FormData
-    syncFilesToInput();
-
-    const formData = new FormData(form);
-
-    const peso = pesoTotalFotos(formData);
-    if (peso > MAX_UPLOAD_BYTES) {
-      if (errEl) errEl.textContent = `Las fotos pesan ${formatMB(peso)} MB en total (máx. ${formatMB(MAX_UPLOAD_BYTES)} MB). Quita alguna foto e intenta de nuevo.`;
-      if (btn) { btn.disabled = false; btn.textContent = 'Publicar mi vehículo'; }
-      return;
-    }
-
-    try {
-      const res  = await fetch('/api/anuncios', { method: 'POST', body: formData });
-      const data = await res.json();
-      if (!res.ok) {
-        if (errEl) errEl.textContent = data.error || 'Error al enviar el anuncio.';
-      } else {
-        // Redirigir o mostrar mensaje de éxito
-        const success = document.getElementById('anuncioSuccess');
-        if (success) {
-          form.style.display = 'none';
-          success.style.display = 'block';
-        } else {
-          showToast('✅ Anuncio enviado correctamente', 'success');
-          form.reset();
-          pendingFiles = [];
-          renderPendingPreviews();
-        }
-      }
-    } catch {
-      if (errEl) errEl.textContent = 'Error de conexión. Intenta de nuevo.';
-    } finally {
-      if (btn) { btn.disabled = false; btn.textContent = 'Publicar mi vehículo'; }
-    }
-  });
-}
-window.initVendedorForm = initVendedorForm;
-
-// Auto-inicializar el form de vendedor si existe en la página actual
-document.addEventListener('DOMContentLoaded', () => {
-  if (document.getElementById('anuncioForm')) {
-    initVendedorForm();
-  }
-});
+    </div>`,g=s.length>1?s:null,F=0,document.getElementById("modalOverlay").classList.add("open"),document.body.style.overflow="hidden"}function X(e){if(!(g!=null&&g.length))return;F=e;const t=document.getElementById("mgMain"),n=document.getElementById("mgCurrent"),o=document.querySelectorAll(".mg-thumb");t&&(t.src=`/img/${m(g[e])}`),n&&(n.textContent=String(e+1)),o.forEach((i,c)=>i.classList.toggle("active",c===e))}function he(){g&&X((F-1+g.length)%g.length)}function Ee(){g&&X((F+1)%g.length)}function be(){var e;(e=document.getElementById("modalOverlay"))==null||e.classList.remove("open"),document.body.style.overflow="",g=null,F=0}function gt(e,t){if(!I.find(n=>n.id===e)){const n=t.find(o=>o.id===e);n&&le([...I,n])}ve(e,"dealer")}document.addEventListener("keydown",e=>{e.key==="Escape"&&be(),e.key==="ArrowLeft"&&g&&he(),e.key==="ArrowRight"&&g&&Ee()});function yt(e){const t=document.getElementById("fOfertaHidden"),n=document.getElementById("precioOfertaWrap");t&&(t.value=e.checked?"1":"0"),n&&(n.style.display=e.checked?"block":"none")}function vt(){const e=document.getElementById("vehicleFormWrap"),t=document.getElementById("toggleFormBtn");if(!e)return;const n=e.style.display==="none"||e.style.display==="";e.style.display=n?"block":"none",t&&(t.textContent=n?"✕ Cerrar formulario":"+ Agregar vehículo"),n||Y()}function Y(){var u;de(null),q([]),Me([]);const e=document.getElementById("fImagen");if(e){e.value="";const f=(u=e.parentNode)==null?void 0:u.querySelector(".crop-previews");f&&(f.innerHTML="")}const t=document.getElementById("fImagenesExtra");t&&(t.value="");const n=document.getElementById("fotoPendingPreview");n&&(n.innerHTML="");const o=document.getElementById("fotosCount");o&&(o.textContent="");const i=document.getElementById("vehicleForm");i&&i.reset();const c=(f,y)=>{const B=document.getElementById(f);B&&(B.value=y)},s=(f,y)=>{const B=document.getElementById(f);B&&(B.textContent=y)};c("editId",""),c("fOfertaHidden","0"),c("fMoneda","DOP"),s("formTitle","Nuevo vehículo"),s("submitBtn","Guardar vehículo"),s("formError","");const a=document.getElementById("vehicleFormWrap");a&&(a.style.display="none");const r=document.getElementById("toggleFormBtn");r&&(r.textContent="+ Agregar vehículo");const d=document.getElementById("precioOfertaWrap");d&&(d.style.display="none"),Z([]),Q("DOP")}function ht(e){const t=I.find(a=>a.id===e);if(!t)return;de(e),q(Array.isArray(t.imagenes_extra)?[...t.imagenes_extra]:[]);const n=(a,r)=>{const d=document.getElementById(a);d&&(d.value=String(r))},o=(a,r)=>{const d=document.getElementById(a);d&&(d.textContent=r)};n("editId",e),n("fMarca",t.marca),n("fModelo",t.modelo),n("fAnio",t.anio),n("fTipo",t.tipo),n("fPrecio",t.precio),n("fDescripcion",t.descripcion||""),n("fOfertaHidden",t.oferta?"1":"0"),n("fMoneda",t.moneda||"DOP"),n("fPrecioOferta",t.precio_oferta||"");const i=document.getElementById("fOferta");if(i){i.checked=!!t.oferta;const a=document.getElementById("precioOfertaWrap");a&&(a.style.display=t.oferta?"block":"none")}o("formTitle",`Editando: ${t.marca} ${t.modelo}`),o("submitBtn","Actualizar vehículo"),o("formError",""),Q(t.moneda||"DOP"),Z(M);const c=document.getElementById("vehicleFormWrap");c&&(c.style.display="block",c.scrollIntoView({behavior:"smooth",block:"start"}));const s=document.getElementById("toggleFormBtn");s&&(s.textContent="✕ Cerrar formulario")}function Q(e){const t=document.getElementById("btnDOP"),n=document.getElementById("btnUSD");t&&t.classList.toggle("active",e==="DOP"),n&&n.classList.toggle("active",e==="USD")}function Et(e){const t=document.getElementById("fMoneda");t&&(t.value=e),Q(e)}function Z(e){const t=document.getElementById("imagenesExistentes");if(t){if(!e.length){t.innerHTML="",t.style.display="none";return}t.style.display="grid",t.className="imagenes-existentes foto-preview-grid",t.innerHTML=e.map((n,o)=>`
+    <div class="foto-preview-item" id="ithumb-${o}">
+      <img src="/img/${bt(n)}" alt="Foto ${o+1}" loading="lazy" />
+      <button type="button" class="foto-preview-del" onclick="eliminarFotoExistente(${o})" aria-label="Eliminar foto ${o+1}">✕</button>
+    </div>`).join("")}}function bt(e){return e==null?"":String(e).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}function It(e){const t=[...M];t.splice(e,1),q(t),Z(M)}async function Bt(e){e.preventDefault();const t=document.getElementById("formError"),n=document.getElementById("submitBtn");t&&(t.textContent=""),n&&(n.disabled=!0,n.textContent="Guardando…");const o=new FormData(document.getElementById("vehicleForm"));o.set("imagenes_extra_keep",JSON.stringify(M));const i=Oe(o);if(i>4194304){t&&(t.textContent=`Las fotos pesan ${te(i)} MB en total (máx. ${te(4194304)} MB). Quita alguna foto e intenta de nuevo.`),n&&(n.disabled=!1,n.textContent=x?"Actualizar vehículo":"Guardar vehículo");return}try{const c=await We(x,o);c.ok?(E(x?"✅ Vehículo actualizado":"✅ Vehículo agregado","success"),Y(),await Promise.all([O(),G()])):t&&(t.textContent=c.error||"Error al guardar.")}catch{t&&(t.textContent="Error de conexión.")}finally{n&&(n.disabled=!1,n.textContent=x?"Actualizar vehículo":"Guardar vehículo")}}async function wt(e){const t=I.find(n=>n.id===e);if(!(!t||!confirm(`¿Eliminar "${t.marca} ${t.modelo}"? Esta acción no se puede deshacer.`)))try{await He(e)?(E("🗑 Vehículo eliminado","success"),await Promise.all([O(),G()])):E("Error al eliminar","error")}catch{E("Error de conexión","error")}}function $t(){"serviceWorker"in navigator&&window.addEventListener("load",()=>{navigator.serviceWorker.register("/sw.js",{scope:"/"}).then(r=>console.log("[KingsDealer PWA] SW:",r.scope)).catch(r=>console.warn("[KingsDealer PWA] SW error:",r))});let e=null;const t=document.getElementById("pwaBanner"),n=document.getElementById("pwaFab"),o=document.getElementById("pwaBannerInstall"),i=document.getElementById("pwaBannerClose"),c=sessionStorage.getItem("pwa-dismissed");window.addEventListener("beforeinstallprompt",r=>{r.preventDefault(),e=r,!c&&t&&setTimeout(()=>t.classList.add("show"),2500)}),o&&o.addEventListener("click",async()=>{if(!e)return;e.prompt();const{outcome:r}=await e.userChoice;e=null,t==null||t.classList.remove("show"),r==="accepted"&&E("✅ ¡App instalada!","success")}),i&&i.addEventListener("click",()=>{t==null||t.classList.remove("show"),sessionStorage.setItem("pwa-dismissed","1"),e&&n&&setTimeout(()=>{n.style.display="flex"},400)}),n&&n.addEventListener("click",async()=>{if(!e)return;e.prompt();const{outcome:r}=await e.userChoice;e=null,n.style.display="none",r==="accepted"&&E("✅ ¡App instalada!","success")});const s=/iphone|ipad|ipod/i.test(navigator.userAgent),a=window.matchMedia("(display-mode: standalone)").matches;s&&!a&&!c&&t&&setTimeout(()=>{const r=document.getElementById("pwaBannerInstall");r&&(r.textContent="Ver cómo",r.addEventListener("click",()=>{E('Toca Compartir ↑ → "Añadir a pantalla de inicio"',"success"),t.classList.remove("show")},{once:!0})),t.classList.add("show")},2500)}function Lt(e){var n,o;const t=document.getElementById("fMoneda");t&&(t.value=e),(n=document.getElementById("btnDOP"))==null||n.classList.toggle("active",e==="DOP"),(o=document.getElementById("btnUSD"))==null||o.classList.toggle("active",e==="USD")}function At(e){const t=e.classList.contains("banco-open");document.querySelectorAll(".banco-card").forEach(n=>n.classList.remove("banco-open")),t||e.classList.add("banco-open")}function Ct(){const e=document.getElementById("bancosGrid"),t=document.getElementById("bancosToggleBtn");if(!e||!t)return;const n=e.classList.toggle("open");t.classList.toggle("open",n);const o=t.querySelector("span:not(.bancos-trigger-arrow)");o&&(o.textContent=n?"Ocultar bancos":"Ver nuestros bancos aliados"),n&&e.scrollIntoView({behavior:"smooth",block:"nearest"})}async function St(){const e=await Re(),t=document.getElementById("mapaLat"),n=document.getElementById("mapaLon"),o=document.getElementById("mapaLabel"),i=document.getElementById("mapaConfigWrap");t&&(t.value=e.lat),n&&(n.value=e.lon),o&&(o.value=e.label),i&&(i.style.display="block",i.scrollIntoView({behavior:"smooth"}))}async function Mt(){var i,c,s;const e=((i=document.getElementById("mapaLat"))==null?void 0:i.value.trim())||"",t=((c=document.getElementById("mapaLon"))==null?void 0:c.value.trim())||"",n=((s=document.getElementById("mapaLabel"))==null?void 0:s.value.trim())||"";if(!e||!t){alert("Ingresa latitud y longitud.");return}if(await je(e,t,n)){const a=`${parseFloat(t)-.012},${parseFloat(e)-.008},${parseFloat(t)+.012},${parseFloat(e)+.008}`,r=document.getElementById("mapaIframe");r&&(r.src=`https://www.openstreetmap.org/export/embed.html?bbox=${a}&layer=mapnik&marker=${e},${t}`);const d=document.getElementById("mapaConfigWrap");d&&(d.style.display="none"),E("✅ Ubicación actualizada","success")}else alert("Error al guardar.")}function xt(){const e=document.getElementById("anunciosPanel");if(!e)return;const t=e.style.display!=="none";e.style.display=t?"none":"block",t||_("pendiente",document.querySelector(".anuncio-filter-btn"))}async function _(e,t){document.querySelectorAll(".anuncio-filter-btn").forEach(i=>i.classList.remove("active")),t&&t.classList.add("active");const n=await qe(e||void 0),o=document.getElementById("anunciosList");if(o){if(!n.length){o.innerHTML='<p class="anuncio-empty">No hay anuncios en esta categoría.</p>';return}o.innerHTML=n.map(i=>{const c=i.moneda==="USD"?"US$":"RD$",s=Number(i.precio).toLocaleString("es-DO");return`<div class="anuncio-item">
+      ${i.imagen?`<img src="/img/${i.imagen}" class="anuncio-img" />`:""}
+      <div class="anuncio-data">
+        <div class="anuncio-titulo">${i.marca} ${i.modelo} ${i.anio} — <span class="anuncio-cond ${i.condicion}">${i.condicion}</span></div>
+        <div class="anuncio-precio">${c} ${s}</div>
+        <div class="anuncio-contacto"><strong>${i.nombre}</strong> · ${i.telefono}${i.whatsapp?" · WA: "+i.whatsapp:""}</div>
+        ${i.descripcion?`<p class="anuncio-desc">${i.descripcion}</p>`:""}
+        <div class="anuncio-estado-badge estado-${i.estado}">${i.estado.toUpperCase()}</div>
+      </div>
+      <div class="anuncio-actions">
+        ${i.estado!=="aprobado"?`<button class="btn-anuncio-accion btn-aprobar" onclick="cambiarEstadoAnuncio(${i.id},'aprobado')">Aprobar</button>`:""}
+        ${i.estado!=="rechazado"?`<button class="btn-anuncio-accion btn-rechazar" onclick="cambiarEstadoAnuncio(${i.id},'rechazado')">Rechazar</button>`:""}
+        <button class="btn-anuncio-accion btn-eliminar-an" onclick="eliminarAnuncio(${i.id})">Eliminar</button>
+      </div>
+    </div>`}).join("")}}async function Tt(e,t){var c;await ze(e,t);const n=document.querySelector(".anuncio-filter-btn.active"),o=((c=n==null?void 0:n.textContent)==null?void 0:c.toLowerCase())||"";_(o==="todos"?"":o==="pendientes"?"pendiente":o==="aprobados"?"aprobado":"rechazado",n),E(`✅ Marcado como ${t}`,"success")}async function Pt(e){confirm("¿Eliminar este anuncio?")&&(await Ge(e),_("",document.querySelector(".anuncio-filter-btn:last-child")),E("🗑 Anuncio eliminado","success"))}function kt(){const e=document.getElementById("statVehiculos"),t=document.getElementById("statVehiculos2");if(!e||!t)return;new MutationObserver(()=>{t.textContent=e.textContent}).observe(e,{childList:!0,subtree:!0,characterData:!0})}function Ft(e){var n,o;const t=document.getElementById("vMoneda");t&&(t.value=e),(n=document.getElementById("vBtnDOP"))==null||n.classList.toggle("active",e==="DOP"),(o=document.getElementById("vBtnUSD"))==null||o.classList.toggle("active",e==="USD")}function Ie(e){var n,o;const t=document.getElementById("vCondicion");t&&(t.value=e),(n=document.getElementById("cBtnUsado"))==null||n.classList.toggle("cond-inactive",e!=="usado"),(o=document.getElementById("cBtnNuevo"))==null||o.classList.toggle("cond-inactive",e!=="nuevo")}function Dt(e){const t=document.getElementById("vstep"+e);if(!t)return;const n=t.querySelectorAll("[required]");let o=!0,i=null;if(n.forEach(s=>{s.classList.remove("field-error"),s.value.trim()||(s.classList.add("field-error"),o=!1,i||(i=s))}),o){const s=t.querySelector("#vAnio");if(s){const r=parseInt(s.value);(r<1980||r>2030)&&(s.classList.add("field-error"),o=!1,i=s)}const a=t.querySelector("#vPrecio");a&&parseFloat(a.value)<=0&&(a.classList.add("field-error"),o=!1,i=a)}if(!o){i==null||i.focus(),i==null||i.scrollIntoView({behavior:"smooth",block:"center"});const s=t.querySelector(".btn-primary");s&&(s.classList.add("btn-shake"),setTimeout(()=>s.classList.remove("btn-shake"),500));return}t.style.display="none";const c=document.getElementById("vstep"+(e+1));c&&(c.style.display=""),Be(e+1),e+1===3&&Nt(),window.scrollTo({top:0,behavior:"smooth"})}function Ot(e){const t=document.getElementById("vstep"+e),n=document.getElementById("vstep"+(e-1));t&&(t.style.display="none"),n&&(n.style.display=""),Be(e-1),window.scrollTo({top:0,behavior:"smooth"})}function Be(e){[1,2,3].forEach(t=>{const n=document.getElementById("vstep-ind-"+t);n&&(n.classList.toggle("vstep-active",t===e),n.classList.toggle("vstep-done",t<e))})}function Nt(){var c,s,a,r,d,u,f,y,B;const e=((c=document.getElementById("vMoneda"))==null?void 0:c.value)==="USD"?"US$":"RD$",t=Number(((s=document.getElementById("vPrecio"))==null?void 0:s.value)||0).toLocaleString("es-DO"),n=(a=document.getElementById("vCondicion"))==null?void 0:a.value,o=[["Nombre",((r=document.getElementById("vNombre"))==null?void 0:r.value)||""],["Teléfono",((d=document.getElementById("vTelefono"))==null?void 0:d.value)||""],["Vehículo",`${((u=document.getElementById("vMarca"))==null?void 0:u.value)||""} ${((f=document.getElementById("vModelo"))==null?void 0:f.value)||""} ${((y=document.getElementById("vAnio"))==null?void 0:y.value)||""}`],["Tipo",((B=document.getElementById("vTipo"))==null?void 0:B.value)||""],["Condición",n==="nuevo"?"Nuevo":"Usado"],["Precio",`${e} ${t}`]],i=document.getElementById("vResumen");i&&(i.innerHTML=o.map(([we,$e])=>`<div class="resumen-row">
+         <span>${we}</span>
+         <strong>${m($e)}</strong>
+       </div>`).join(""))}async function _t(e){e.preventDefault();const t=document.getElementById("vSubmitBtn"),n=document.getElementById("vFormError");t&&(t.disabled=!0,t.textContent="Enviando…"),n&&(n.textContent=""),K();try{const o=new FormData(document.getElementById("venderForm")),i=await Ke(o);if(!i.ok)n&&(n.textContent=i.error||"Error al enviar."),t&&(t.disabled=!1,t.textContent="Publicar mi vehículo");else{const c=document.getElementById("vstep3"),s=document.getElementById("vstepSuccess");c&&(c.style.display="none"),s&&(s.style.display="")}}catch{n&&(n.textContent="Error de conexión."),t&&(t.disabled=!1,t.textContent="Publicar mi vehículo")}}function Vt(){var t;Ie("usado"),(t=document.getElementById("menuToggle"))==null||t.addEventListener("click",()=>{var n,o;(n=document.getElementById("mobileNav"))==null||n.classList.toggle("open"),(o=document.getElementById("menuToggle"))==null||o.classList.toggle("open")});const e=document.getElementById("venderForm");e&&(e.addEventListener("input",ae),e.addEventListener("change",ae))}function ae(e){e.target.classList.remove("field-error")}function Ut(){const e=document.getElementById("loginForm"),t=document.getElementById("loginBtn");e&&t&&e.addEventListener("submit",()=>{t.disabled=!0,t.textContent="Verificando…"})}function Rt(){const e=document.getElementById("password");e&&(e.type=e.type==="password"?"text":"password")}document.addEventListener("DOMContentLoaded",()=>{O(),G(),Xe(),Qe(),ot(),it(),ct(),at(),pt(),$t(),document.getElementById("venderForm")&&Vt(),document.getElementById("bancosGrid")&&kt(),document.getElementById("loginForm")&&Ut()});const l=window;l.toggleShowMore=et;l.clearSort=Ze;l.openModal=ve;l.closeModal=be;l.mgGoTo=X;l.mgPrev=he;l.mgNext=Ee;l.openModalFromSlider=gt;l.goToSlide=D;l.showToast=E;l.setMoneda=Et;l.setMonedaIndex=Lt;l.toggleForm=vt;l.resetForm=Y;l.editVehicle=ht;l.deleteVehicle=wt;l.submitVehicle=Bt;l.togglePrecioOferta=yt;l.eliminarFotoExistente=It;l.removePendingFile=st;l.syncFilesToInput=K;l.setCropRatio=lt;l.confirmCrop=dt;l.cancelCrop=mt;l.toggleBanco=At;l.toggleBancosGrid=Ct;l.abrirConfigMapa=St;l.guardarMapa=Mt;l.toggleAnuncios=xt;l.loadAnuncios=_;l.cambiarEstadoAnuncio=Tt;l.eliminarAnuncio=Pt;l.setVMoneda=Ft;l.setCondicion=Ie;l.vstepNext=Dt;l.vstepBack=Ot;l.submitAnuncio=_t;l.togglePw=Rt;
