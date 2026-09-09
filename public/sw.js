@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════
-   KingsDealer — Service Worker  v1
+   Peña's Autos — Service Worker  v1
    Estrategia:
    · Shell estático  → Cache First (CSS, JS, fuentes)
    · API /api/*      → Network Only (datos siempre frescos)

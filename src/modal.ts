@@ -69,7 +69,7 @@ export function openModal(id: number, origen: string): void {
         </div>
         <div class="modal-cta">
           ${v.whatsapp_vendedor
-            ? `<a href="https://wa.me/${v.whatsapp_vendedor.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('Hola ' + v.nombre_vendedor + ', vi tu ' + v.marca + ' ' + v.modelo + ' ' + v.anio + ' en KingsDealer')}" class="btn-primary" target="_blank" rel="noopener">WhatsApp vendedor</a>`
+            ? `<a href="https://wa.me/${v.whatsapp_vendedor.replace(/[^0-9]/g,'')}?text=${encodeURIComponent('Hola ' + v.nombre_vendedor + ', vi tu ' + v.marca + ' ' + v.modelo + ' ' + v.anio + ' en Peña\u0027s Autos')}" class="btn-primary" target="_blank" rel="noopener">WhatsApp vendedor</a>`
             : ''}
           <a href="tel:${v.telefono_vendedor}" class="btn-ghost" style="color:#333;border-color:#ccc;">Llamar: ${esc(v.telefono_vendedor)}</a>
         </div>` : `

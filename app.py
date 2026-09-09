@@ -1,5 +1,5 @@
 """
-KingsDealer - Flask Backend v6 (PostgreSQL Version)
+Peña's Autos - Flask Backend v6 (PostgreSQL Version)
 + Tabla configuracion (mapa lat/lon configurable por admin)
 + Tabla anuncios_clientes (clientes pueden publicar su auto)
 + Rutas /vender y /api/anuncios
@@ -147,7 +147,7 @@ def init_db():
         # Valores por defecto para el mapa
         conn.execute("INSERT INTO configuracion (clave, valor) VALUES ('mapa_lat', '18.4737') ON CONFLICT (clave) DO NOTHING")
         conn.execute("INSERT INTO configuracion (clave, valor) VALUES ('mapa_lon', '-69.9490') ON CONFLICT (clave) DO NOTHING")
-        conn.execute("INSERT INTO configuracion (clave, valor) VALUES ('mapa_label', 'KingsDealer — Av. Abraham Lincoln, Santo Domingo') ON CONFLICT (clave) DO NOTHING")
+        conn.execute("INSERT INTO configuracion (clave, valor) VALUES ('mapa_label', 'Peña''s Autos') ON CONFLICT (clave) DO NOTHING")
 
         # ── Tabla de anuncios de clientes ──
         conn.execute('''
@@ -277,11 +277,11 @@ def index():
         mapa = {
             'lat':   get_config('mapa_lat',   '18.4737'),
             'lon':   get_config('mapa_lon',   '-69.9490'),
-            'label': get_config('mapa_label', 'KingsDealer — Av. Abraham Lincoln, Santo Domingo'),
+            'label': get_config('mapa_label', 'Peña''s Autos'),
         }
     except Exception:
         # Si la DB no responde, usar valores por defecto y seguir cargando la página
-        mapa = {'lat': '18.4737', 'lon': '-69.9490', 'label': 'KingsDealer — Santo Domingo'}
+        mapa = {'lat': '18.4737', 'lon': '-69.9490', 'label': 'Peña\'s Autos'}
     return render_template('index.html', role=role, mapa=mapa)
 
 
@@ -474,7 +474,7 @@ def api_get_mapa():
     return jsonify({
         'lat':   get_config('mapa_lat',   '18.4737'),
         'lon':   get_config('mapa_lon',   '-69.9490'),
-        'label': get_config('mapa_label', 'KingsDealer — Av. Abraham Lincoln'),
+        'label': get_config('mapa_label', 'Peña''s Autos'),
     })
 
 

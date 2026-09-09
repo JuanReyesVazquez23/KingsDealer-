@@ -1,14 +1,14 @@
 /* ═══════════════════════════════════════════════
-   KingsDealer — CSS v7
+   Peña's Autos — CSS v7
    UI renovada: moderna, limpia, organizada
-   Paleta: negro #0A0A0A · rojo #CC0000 · blanco
+   Paleta: negro #0A0A0A · dorado #C9A84C · blanco
    ═══════════════════════════════════════════════ */
 
 /* ── Variables ────────────────────────────────── */
 :root {
-  --red:        #CC0000;
-  --red-dark:   #A00000;
-  --red-glow:   rgba(204,0,0,.18);
+  --red:        #C9A84C;
+  --red-dark:   #A8892C;
+  --red-glow:   rgba(201,168,76,.18);
 
   --black:      #0A0A0A;
   --dark:       #111111;
@@ -1414,7 +1414,7 @@ ul { list-style: none; }
 }
 
 /* ═══════════════════════════════════════════════
-   KingsDealer v7 — Diseño más espacioso y maduro
+   Peña's Autos v7 — Diseño más espacioso y maduro
    + Tarjetas de anuncios de clientes
    + Contacto vendedor en modal
    + Espaciado general aumentado
@@ -2294,7 +2294,7 @@ input[type="file"][data-crop] + .fotos-hint {
 
 /* ═══════════════════════════════════════════════════════
    HERO V2 — Diseño profesional enriquecido
-   Apéndice a styles.css · KingsDealer
+   Apéndice a styles.css · Peña's Autos
    Variables heredadas del root existente.
 ═══════════════════════════════════════════════════════ */
 

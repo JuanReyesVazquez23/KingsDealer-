@@ -5,8 +5,8 @@ export function initPWA(): void {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js', { scope: '/' })
-        .then(r => console.log('[KingsDealer PWA] SW:', r.scope))
-        .catch(e => console.warn('[KingsDealer PWA] SW error:', e));
+        .then(r => console.log('[Peña\'s Autos PWA] SW:', r.scope))
+        .catch(e => console.warn('[Peña\'s Autos PWA] SW error:', e));
     });
   }
 
