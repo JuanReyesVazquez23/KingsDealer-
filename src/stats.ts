@@ -15,6 +15,6 @@ export async function updateStatCount(): Promise<void> {
   try {
     const data = await fetchCount();
     animateCount(document.getElementById('statVehiculos'), data.dealer || 0);
-    animateCount(document.getElementById('statParticulares'), data.particulares || 0);
+    animateCount(document.getElementById('statVehiculos2'), data.dealer || 0);
   } catch { /* silent */ }
 }

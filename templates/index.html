@@ -24,7 +24,6 @@
     <nav class="header-nav">
       <a href="#ofertas-section">Ofertas</a>
       <a href="#catalogo">Catálogo</a>
-      <a href="/vender" class="nav-vender">Vende tu auto</a>
       <a href="#financiamiento">Financiamiento</a>
       <a href="#contacto">Contacto</a>
       {% if role == 'admin' %}
@@ -39,7 +38,6 @@
   <div class="mobile-nav" id="mobileNav">
     <a href="#ofertas-section" onclick="closeMobile()">Ofertas</a>
     <a href="#catalogo"        onclick="closeMobile()">Catálogo</a>
-    <a href="/vender"          onclick="closeMobile()">Vende tu auto</a>
     <a href="#financiamiento"  onclick="closeMobile()">Financiamiento</a>
     <a href="#contacto"        onclick="closeMobile()">Contacto</a>
     {% if role == 'admin' %}
@@ -104,9 +102,8 @@
 
       <!-- CTAs -->
       <div class="hero-ctas">
-        <a href="#catalogo" class="btn-primary">Ver catálogo</a>
-        <a href="/vender"   class="btn-ghost">Vende tu auto</a>
-      </div>
+      <a href="#catalogo" class="btn-primary">Ver catálogo</a>
+    </div>
     </div>
 
     <!-- Right: feature card stack -->
@@ -144,39 +141,17 @@
             <span class="hero-card-stat-num" id="statVehiculos">0</span>
             <span class="hero-card-stat-lbl">Vehículos</span>
           </div>
-          <div class="hero-card-stat-divider"></div>
-          <div class="hero-card-stat-item">
-            <span class="hero-card-stat-num">12+</span>
-            <span class="hero-card-stat-lbl">Años</span>
-          </div>
-          <div class="hero-card-stat-divider"></div>
-          <div class="hero-card-stat-item">
-            <span class="hero-card-stat-num">500+</span>
-            <span class="hero-card-stat-lbl">Clientes</span>
-          </div>
         </div>
       </div>
 
     </div><!-- /hero-v2-cards -->
   </div><!-- /hero-v2-inner -->
 
-  <!-- Bottom stats bar (kept for JS counter compatibility) -->
+  <!-- Bottom stats bar -->
   <div class="hero-stats hero-stats-v2">
     <div class="stat">
       <span class="stat-num" id="statVehiculos2">0</span>
       <span class="stat-label">Vehículos del dealer</span>
-    </div>
-    <div class="stat">
-      <span class="stat-num" id="statParticulares">0</span>
-      <span class="stat-label">Vendedores particulares</span>
-    </div>
-    <div class="stat">
-      <span class="stat-num">12+</span>
-      <span class="stat-label">Años de experiencia</span>
-    </div>
-    <div class="stat">
-      <span class="stat-num">500+</span>
-      <span class="stat-label">Clientes atendidos</span>
     </div>
   </div>
 </section>
@@ -332,7 +307,7 @@
 
         <div class="form-group full fotos-extra-group">
           <label>Fotos adicionales
-            <small style="text-transform:none;letter-spacing:0;color:rgba(255,255,255,.4);font-weight:400">
+            <small style="text-transform:none;letter-spacing:0;color:rgba(201,168,76,.4);font-weight:400">
               — JPG, PNG, WEBP · máx. 8 MB c/u · sin límite de cantidad
             </small>
           </label>
@@ -356,7 +331,7 @@
           <div class="precio-oferta-wrap" id="precioOfertaWrap" style="display:none">
             <div class="form-group" style="margin-top:12px">
               <label>Precio de oferta
-                <small style="text-transform:none;letter-spacing:0;color:rgba(255,255,255,.4);font-weight:400">
+                <small style="text-transform:none;letter-spacing:0;color:rgba(201,168,76,.4);font-weight:400">
                   — misma moneda elegida
                 </small>
               </label>
@@ -386,7 +361,7 @@
     <div class="section-header">
       <p class="section-eyebrow">Nuestros vehículos</p>
       <h2 class="section-title">Catálogo <span class="accent">Completo</span></h2>
-      <p class="section-sub">Vehículos certificados del dealer y publicaciones de vendedores particulares</p>
+      <p class="section-sub">Vehículos certificados del dealer</p>
     </div>
 
     <!-- Filtros -->
@@ -397,7 +372,6 @@
       <button class="filter-btn" data-tipo="Vehículos Compactos">Vehículos Compactos</button>
       <button class="filter-btn" data-tipo="Pickup">Pickup</button>
       <button class="filter-btn" data-tipo="Camionetas Compactas">Camionetas Compactas</button>
-      <button class="filter-btn filter-btn-part" data-tipo="__particulares__">Vendedores Particulares</button>
     </div><!-- /filters -->
 
     <!-- Sort bar -->
@@ -450,17 +424,6 @@
 
   </div>
 </section><!-- /catalogo -->
-
-<!-- VENDE TU AUTO -->
-<section class="vende-strip">
-  <div class="vende-strip-inner">
-    <div class="vende-strip-text">
-      <h2>¿Quieres vender tu vehículo?</h2>
-      <p>Publica gratis y llega a compradores en toda República Dominicana.</p>
-    </div>
-    <a href="/vender" class="btn-primary vende-strip-btn">Publicar mi auto →</a>
-  </div>
-</section>
 
 <!-- BENEFICIOS -->
 <section class="beneficios">
@@ -647,7 +610,6 @@
         <span>+1 (829) 604-5932</span>
         <span>mpeña5377@gmail.com</span>
         <span>Instagram: @penasautosrd</span>
-        <span>Lun–Sáb · 8:00 AM – 7:00 PM</span>
       </div>
     </div>
   </div>
