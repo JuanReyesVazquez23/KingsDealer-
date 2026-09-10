@@ -7,7 +7,7 @@
    · Navegación HTML → Network First con fallback a caché
    ═══════════════════════════════════════════════ */
 
-const CACHE_SHELL   = "kd-shell-v1";
+const CACHE_SHELL   = "kd-shell-v2";
 const CACHE_IMAGES  = "kd-images-v1";
 
 // Assets del shell que se pre-cachean al instalar
@@ -18,6 +18,10 @@ const SHELL_ASSETS = [
   "/manifest.json",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
+  "/icons/apple-touch-icon.png",
+  "/icons/favicon-32.png",
+  "/icons/favicon-16.png",
+  "/icons/logo-emblem.png",
   "/offline.html",
   "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap"
 ];

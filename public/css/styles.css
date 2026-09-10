@@ -17,6 +17,9 @@
   --dark-border: rgba(201,168,76,.1);
   --dark-border-2: rgba(201,168,76,.16);
 
+  /* Nota: --white/--off-white quedan del esquema original; sus VALORES
+     ya son dorado/negro (paleta v7) — se mantienen los nombres para no
+     tener que tocar cada selector que los usa. */
   --white:      #C9A84C;
   --off-white:  #111111;
   --light:      #181818;
@@ -31,6 +34,7 @@
   --font-display: 'Bebas Neue', sans-serif;
   --font-cond:    'Barlow Condensed', sans-serif;
   --font-body:    'Barlow', sans-serif;
+  --font-brand:   'Playfair Display', 'DM Serif Display', Georgia, serif; /* wordmark: coincide con el logo real (escudo dorado) */
 
   --r-sm:  6px;
   --r-md:  10px;
@@ -85,19 +89,22 @@ ul { list-style: none; }
   justify-content: space-between;
   gap: 20px;
 }
-.logo { display: flex; align-items: center; gap: 0; text-decoration: none; }
-.logo-text { display: flex; align-items: baseline; }
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.logo-emblem { height: 40px; width: auto; display: block; }
+.logo-text { display: flex; align-items: baseline; gap: 6px; }
 .logo-main {
-  font-family: var(--font-display);
-  font-size: 1.55rem;
+  font-family: var(--font-brand);
+  font-weight: 900;
+  font-size: 1.4rem;
   color: var(--red);
-  letter-spacing: 3px;
+  letter-spacing: .5px;
 }
 .logo-sub {
-  font-family: var(--font-display);
-  font-size: 1.55rem;
+  font-family: var(--font-brand);
+  font-weight: 700;
+  font-size: 1.4rem;
   color: var(--white);
-  letter-spacing: 3px;
+  letter-spacing: .5px;
 }
 .header-nav {
   display: none;
@@ -927,7 +934,9 @@ ul { list-style: none; }
 @media (min-width: 700px) { .footer-inner { grid-template-columns: 1.5fr 1fr 1fr; align-items: start; } }
 
 .footer-brand {}
-.footer-logo-text { font-family: var(--font-display); font-size: 1.6rem; color: var(--white); letter-spacing: 3px; display: block; margin-bottom: 6px; }
+.footer-brand-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.footer-logo-emblem { height: 34px; width: auto; display: block; }
+.footer-logo-text { font-family: var(--font-brand); font-weight: 900; font-size: 1.4rem; color: var(--white); letter-spacing: .5px; display: block; }
 .footer-brand p { font-size: .8rem; color: var(--text-inv-2); line-height: 1.6; max-width: 260px; }
 
 .footer-col-title { font-family: var(--font-cond); font-size: .72rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-inv-2); margin-bottom: 14px; }
@@ -1003,7 +1012,7 @@ ul { list-style: none; }
 .login-page { min-height: 100svh; display: flex; align-items: center; justify-content: center; padding: 20px; background: var(--black); position: relative; overflow: hidden; }
 .login-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 70% at 50% 50%, rgba(201,168,76,.08) 0%, transparent 65%); }
 .login-card { position: relative; background: var(--dark-2); border: 1px solid var(--dark-border-2); border-radius: var(--r-xl); padding: 38px 32px; width: 100%; max-width: 400px; box-shadow: 0 24px 80px rgba(0,0,0,.5); animation: modalIn .3s var(--ease); }
-.login-logo { display: flex; align-items: center; gap: 6px; justify-content: center; margin-bottom: 24px; }
+.login-logo { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 24px; }
 .login-title { font-family: var(--font-display); font-size: 1.7rem; letter-spacing: 2px; color: var(--white); text-align: center; margin-bottom: 4px; }
 .login-sub { font-family: var(--font-cond); font-size: .78rem; letter-spacing: 2px; text-transform: uppercase; color: var(--text-inv-2); text-align: center; margin-bottom: 26px; }
 .login-error { background: rgba(204,0,0,.1); border: 1px solid rgba(204,0,0,.35); color: #ff8080; border-radius: var(--r-sm); padding: 9px 13px; font-size: .85rem; margin-bottom: 18px; text-align: center; }
@@ -1464,7 +1473,8 @@ ul { list-style: none; }
 /* ── Footer más espacioso ── */
 .site-footer { padding: 60px 24px 36px; }
 .footer-inner { gap: 48px; }
-.footer-logo-text { font-size: 1.8rem; margin-bottom: 10px; }
+.footer-logo-text { font-size: 1.8rem; }
+.footer-logo-emblem { height: 40px; }
 .footer-brand p { font-size: .84rem; line-height: 1.7; }
 .footer-col-title { font-size: .7rem; letter-spacing: 2.5px; margin-bottom: 18px; }
 .footer-nav { gap: 11px; }
