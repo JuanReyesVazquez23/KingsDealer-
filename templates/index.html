@@ -25,7 +25,6 @@
     <nav class="header-nav">
       <a href="#ofertas-section">Ofertas</a>
       <a href="#catalogo">Catálogo</a>
-      <a href="#financiamiento">Financiamiento</a>
       <a href="#contacto">Contacto</a>
       {% if role == 'admin' %}
         <span class="admin-badge">Admin</span>
@@ -39,7 +38,6 @@
   <div class="mobile-nav" id="mobileNav">
     <a href="#ofertas-section" onclick="closeMobile()">Ofertas</a>
     <a href="#catalogo"        onclick="closeMobile()">Catálogo</a>
-    <a href="#financiamiento"  onclick="closeMobile()">Financiamiento</a>
     <a href="#contacto"        onclick="closeMobile()">Contacto</a>
     {% if role == 'admin' %}
       <a href="/logout" class="mobile-logout">Cerrar sesión</a>
@@ -59,7 +57,7 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="hero-trust-icon">
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
     </svg>
-    <span>Dealer certificado · RD</span>
+    <span>Confianza y garantía · RD</span>
   </div>
 
   <div class="hero-v2-inner">
@@ -81,15 +79,15 @@
 
       <!-- Sub copy -->
       <p class="hero-sub hero-sub-v2">
-        El dealer con más selección de importados y nacionales en Santo Domingo.
-        Financiamiento con los mejores bancos del país.
+        La mayor selección de vehículos importados y nacionales en Santo Domingo.
+        Compraventa directa, sin intermediarios.
       </p>
 
       <!-- Feature pills -->
       <div class="hero-pills">
         <span class="hero-pill">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-          Financiamiento disponible
+          Compraventa directa
         </span>
         <span class="hero-pill">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
@@ -121,17 +119,16 @@
         </div>
       </div>
 
-      <!-- Middle card: finance teaser -->
+      <!-- Middle card: quick contact prompt -->
       <div class="hero-card hero-card-finance">
         <div class="hero-card-finance-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <rect x="2" y="5" width="20" height="14" rx="2"/>
-            <line x1="2" y1="10" x2="22" y2="10"/>
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.47 2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
           </svg>
         </div>
         <div>
-          <p class="hero-card-finance-title">Financia hoy</p>
-          <p class="hero-card-finance-sub">Desde 10% anual · Hasta 84 meses</p>
+          <p class="hero-card-finance-title">Contáctanos</p>
+          <p class="hero-card-finance-sub">Asesoría personalizada sin compromiso</p>
         </div>
       </div>
 
@@ -152,7 +149,7 @@
   <div class="hero-stats hero-stats-v2">
     <div class="stat">
       <span class="stat-num" id="statVehiculos2">0</span>
-      <span class="stat-label">Vehículos del dealer</span>
+      <span class="stat-label">Vehículos disponibles</span>
     </div>
   </div>
 </section>
@@ -362,7 +359,7 @@
     <div class="section-header">
       <p class="section-eyebrow">Nuestros vehículos</p>
       <h2 class="section-title">Catálogo <span class="accent">Completo</span></h2>
-      <p class="section-sub">Vehículos certificados del dealer</p>
+      <p class="section-sub">Vehículos disponibles para ti</p>
     </div>
 
     <!-- Filtros -->
@@ -432,12 +429,11 @@
     <div class="ben-card">
       <div class="ben-icon-wrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <rect x="2" y="5" width="20" height="14" rx="2"/>
-          <line x1="2" y1="10" x2="22" y2="10"/>
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
         </svg>
       </div>
-      <h3>Financiamiento Flexible</h3>
-      <p>Cuotas adaptadas a tu presupuesto con los principales bancos del país.</p>
+      <h3>Compraventa Directa</h3>
+      <p>Sin intermediarios. Trato directo y transparente con nuestro equipo.</p>
     </div>
     <div class="ben-card">
       <div class="ben-icon-wrap">
@@ -504,12 +500,12 @@
         <div class="paso-num">03</div>
         <div class="paso-icon-wrap">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="2" y="5" width="20" height="14" rx="2"/>
-            <line x1="2" y1="10" x2="22" y2="10"/>
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
           </svg>
         </div>
-        <h3>Gestiona tu financiamiento</h3>
-        <p>Te conectamos con el banco ideal. Tasas competitivas, plazos flexibles y aprobación rápida.</p>
+        <h3>Gestiona la documentación</h3>
+        <p>Revisas la documentación del vehículo. Todo en regla, sin sorpresas.</p>
       </div>
       <div class="paso-card">
         <div class="paso-num">04</div>
@@ -598,14 +594,13 @@
         <img src="/icons/logo-emblem.png" alt="Peña's Autos" class="logo-emblem footer-logo-emblem" width="60" height="34" />
         <span class="footer-logo-text">Peña's Autos</span>
       </div>
-      <p>Santo Domingo, República Dominicana.<br/>Tu dealer de confianza.</p>
+      <p>Santo Domingo, República Dominicana.<br/>Tu compraventa de confianza.</p>
     </div>
     <div class="footer-col">
       <p class="footer-col-title">Navegación</p>
       <nav class="footer-nav">
         <a href="#catalogo">Catálogo</a>
         <a href="#ofertas-section">Ofertas</a>
-        <a href="#financiamiento">Financiamiento</a>
       </nav>
     </div>
     <div class="footer-col">
@@ -621,7 +616,7 @@
     <p class="footer-legal">
       <span id="secretTrigger">©</span> 2026 Peña's Autos. Todos los derechos reservados.
     </p>
-    <p class="footer-tagline">TU DEALER DE CONFIANZA</p>
+    <p class="footer-tagline">TU COMPRAVENTADE CONFIANZA</p>
   </div>
 </footer>
 

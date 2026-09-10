@@ -1,7 +1,7 @@
 {
   "name": "Peña's Autos",
   "short_name": "Peña's Autos",
-  "description": "Dealer de vehículos en Santo Domingo, República Dominicana",
+  "description": "Compraventa de vehículos en Santo Domingo, República Dominicana",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
