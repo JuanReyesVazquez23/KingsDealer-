@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>{% block title %}Peña's Autos — Santo Domingo{% endblock %}</title>
+
+  <!-- PWA -->
+  <meta name="application-name"                    content="Peña's Autos" />
+  <meta name="description"                         content="Dealer de vehículos en Santo Domingo. Importados y nacionales con financiamiento flexible." />
+  <meta name="theme-color"                         content="#C9A84C" />
+  <meta name="mobile-web-app-capable"              content="yes" />
+  <meta name="apple-mobile-web-app-capable"        content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title"          content="Peña's Autos" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <link rel="manifest"         href="/manifest.json" />
+
+  <style>
+    body {
+      padding-top:    env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left:   env(safe-area-inset-left);
+      padding-right:  env(safe-area-inset-right);
+    }
+  </style>
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&family=DM+Serif+Display:ital@0;1&family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+
+  <!-- Cropper.js CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+  {% block head %}{% endblock %}
+</head>
+<body>
+  {% block body %}{% endblock %}
+  {% block scripts %}{% endblock %}
+
+  <!-- ══ MODAL RECORTE DE IMÁGENES ══════════════════════════
+       Reutilizable para todos los inputs de foto del sitio.
+       Se activa automáticamente al seleccionar una imagen.
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="crop-overlay" id="cropOverlay">
+    <div class="crop-box">
+
+      <div class="crop-header">
+        <h3 class="crop-title">Recortar imagen</h3>
+        <div class="crop-ratio-btns" id="cropRatioBtns">
+          <button class="crop-ratio-btn active" data-ratio="1.6" onclick="setCropRatio(1.6,this)">16:10 Card</button>
+          <button class="crop-ratio-btn" data-ratio="1"    onclick="setCropRatio(1,this)">1:1</button>
+          <button class="crop-ratio-btn" data-ratio="0"    onclick="setCropRatio(0,this)">Libre</button>
+        </div>
+      </div>
+
+      <div class="crop-canvas-wrap">
+        <img id="cropImg" src="" alt="Recortar" />
+      </div>
+
+      <p class="crop-hint">
+        Arrastra para mover · Pellizca para hacer zoom · Arrastra las esquinas para ajustar
+      </p>
+
+      <div class="crop-actions">
+        <button class="btn-ghost crop-cancel-btn" onclick="cancelCrop()">Cancelar</button>
+        <button class="btn-primary" onclick="confirmCrop()">Usar esta foto</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Cropper.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+</body>
+</html>

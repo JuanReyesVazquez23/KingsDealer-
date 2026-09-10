@@ -1,0 +1,665 @@
+{% extends "base.html" %}
+{% block title %}Peña's Autos — Vehículos en Santo Domingo{% endblock %}
+
+{% block body %}
+<script>const ROLE = "{{ role }}";</script>
+<script>
+// PWA Manifest — inyectado dinámicamente para compatibilidad con template
+(function() {
+  var link = document.createElement('link');
+  link.rel  = 'manifest';
+  link.href = '/manifest.json';
+  document.head.appendChild(link);
+})();
+</script>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/" class="logo">
+      <img src="/icons/logo-emblem.png" alt="Peña's Autos" class="logo-emblem" width="68" height="39" />
+      <div class="logo-text">
+        <span class="logo-main">Peña's</span><span class="logo-sub">Autos</span>
+      </div>
+    </a>
+    <nav class="header-nav">
+      <a href="#ofertas-section">Ofertas</a>
+      <a href="#catalogo">Catálogo</a>
+      <a href="#financiamiento">Financiamiento</a>
+      <a href="#contacto">Contacto</a>
+      {% if role == 'admin' %}
+        <span class="admin-badge">Admin</span>
+        <a href="/logout" class="btn-logout">Salir</a>
+      {% endif %}
+    </nav>
+    <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="#ofertas-section" onclick="closeMobile()">Ofertas</a>
+    <a href="#catalogo"        onclick="closeMobile()">Catálogo</a>
+    <a href="#financiamiento"  onclick="closeMobile()">Financiamiento</a>
+    <a href="#contacto"        onclick="closeMobile()">Contacto</a>
+    {% if role == 'admin' %}
+      <a href="/logout" class="mobile-logout">Cerrar sesión</a>
+    {% endif %}
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero hero-v2">
+  <div class="hero-bg"></div>
+
+  <!-- Diagonal accent line -->
+  <div class="hero-diagonal-accent" aria-hidden="true"></div>
+
+  <!-- Floating badge -->
+  <div class="hero-trust-badge" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="hero-trust-icon">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </svg>
+    <span>Dealer certificado · RD</span>
+  </div>
+
+  <div class="hero-v2-inner">
+    <!-- Left: main content -->
+    <div class="hero-v2-content">
+
+      <!-- Eyebrow with animated dot -->
+      <p class="hero-eyebrow hero-eyebrow-v2">
+        <span class="hero-dot-live" aria-hidden="true"></span>
+        Santo Domingo, República Dominicana
+      </p>
+
+      <!-- Main headline -->
+      <h1 class="hero-title hero-title-v2">
+        Tu próximo<br/>
+        <em class="hero-accent-italic">vehículo</em><br/>
+        te espera aquí.
+      </h1>
+
+      <!-- Sub copy -->
+      <p class="hero-sub hero-sub-v2">
+        El dealer con más selección de importados y nacionales en Santo Domingo.
+        Financiamiento con los mejores bancos del país.
+      </p>
+
+      <!-- Feature pills -->
+      <div class="hero-pills">
+        <span class="hero-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          Financiamiento disponible
+        </span>
+        <span class="hero-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          Entrega inmediata
+        </span>
+        <span class="hero-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          Traspaso incluido
+        </span>
+      </div>
+
+      <!-- CTAs -->
+      <div class="hero-ctas">
+      <a href="#catalogo" class="btn-primary">Ver catálogo</a>
+    </div>
+    </div>
+
+    <!-- Right: feature card stack -->
+    <div class="hero-v2-cards" aria-hidden="true">
+
+      <!-- Top card: quick search prompt -->
+      <div class="hero-card hero-card-search">
+        <p class="hero-card-label">Busca tu próximo auto</p>
+        <div class="hero-card-chips">
+          <span>SUV</span>
+          <span>Sedán</span>
+          <span>Pickup</span>
+          <span>Deportivo</span>
+        </div>
+      </div>
+
+      <!-- Middle card: finance teaser -->
+      <div class="hero-card hero-card-finance">
+        <div class="hero-card-finance-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="2" y="5" width="20" height="14" rx="2"/>
+            <line x1="2" y1="10" x2="22" y2="10"/>
+          </svg>
+        </div>
+        <div>
+          <p class="hero-card-finance-title">Financia hoy</p>
+          <p class="hero-card-finance-sub">Desde 10% anual · Hasta 84 meses</p>
+        </div>
+      </div>
+
+      <!-- Bottom card: stats highlight -->
+      <div class="hero-card hero-card-stat">
+        <div class="hero-card-stat-row">
+          <div class="hero-card-stat-item">
+            <span class="hero-card-stat-num" id="statVehiculos">0</span>
+            <span class="hero-card-stat-lbl">Vehículos</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /hero-v2-cards -->
+  </div><!-- /hero-v2-inner -->
+
+  <!-- Bottom stats bar -->
+  <div class="hero-stats hero-stats-v2">
+    <div class="stat">
+      <span class="stat-num" id="statVehiculos2">0</span>
+      <span class="stat-label">Vehículos del dealer</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- MARCAS STRIP -->
+<section class="marcas-strip">
+  <div class="marcas-inner">
+    <p class="marcas-label">Vehículos de las mejores marcas</p>
+    <div class="marcas-track">
+      <div class="marcas-list">
+        <span>Toyota</span><span>Honda</span><span>Nissan</span><span>Hyundai</span>
+        <span>Kia</span><span>Ford</span><span>Chevrolet</span><span>BMW</span>
+        <span>Mercedes-Benz</span><span>Jeep</span><span>Mitsubishi</span><span>Mazda</span>
+        <span>Toyota</span><span>Honda</span><span>Nissan</span><span>Hyundai</span>
+        <span>Kia</span><span>Ford</span><span>Chevrolet</span><span>BMW</span>
+        <span>Mercedes-Benz</span><span>Jeep</span><span>Mitsubishi</span><span>Mazda</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OFERTAS SLIDER -->
+<section class="ofertas-section" id="ofertas-section" style="display:none">
+  <div class="ofertas-header">
+    <div class="ofertas-title-wrap">
+      <span class="ofertas-badge">OFERTAS</span>
+      <h2 class="ofertas-title">Vehículos en <span class="accent">Oferta</span></h2>
+      <p class="ofertas-sub">Precios especiales por tiempo limitado</p>
+    </div>
+    <div class="slider-controls">
+      <button class="slider-btn" id="sliderPrev" aria-label="Anterior">&#8592;</button>
+      <div class="slider-dots" id="sliderDots"></div>
+      <button class="slider-btn" id="sliderNext" aria-label="Siguiente">&#8594;</button>
+    </div>
+  </div>
+  <div class="slider-track-wrap">
+    <div class="slider-track" id="sliderTrack"></div>
+  </div>
+</section>
+
+<!-- ADMIN PANEL -->
+{% if role == 'admin' %}
+<section class="admin-panel" id="adminPanel">
+  <div class="admin-panel-inner">
+
+    <div class="admin-panel-header">
+      <h2>Panel de Administración</h2>
+      <div class="admin-panel-btns">
+        <button class="btn-admin-secondary" onclick="toggleAnuncios()">Anuncios clientes</button>
+        <button class="btn-toggle-form" id="toggleFormBtn" onclick="toggleForm()">+ Agregar vehículo</button>
+      </div>
+    </div>
+
+    <!-- Anuncios de clientes -->
+    <div class="anuncios-panel" id="anunciosPanel" style="display:none">
+      <div class="anuncios-header">
+        <h3>Anuncios de clientes</h3>
+        <div class="anuncios-filters">
+          <button class="anuncio-filter-btn active" onclick="loadAnuncios('pendiente',this)">Pendientes</button>
+          <button class="anuncio-filter-btn" onclick="loadAnuncios('aprobado',this)">Aprobados</button>
+          <button class="anuncio-filter-btn" onclick="loadAnuncios('rechazado',this)">Rechazados</button>
+          <button class="anuncio-filter-btn" onclick="loadAnuncios('',this)">Todos</button>
+        </div>
+      </div>
+      <div id="anunciosList" class="anuncios-list"></div>
+    </div>
+
+    <!-- Config mapa -->
+    <div class="mapa-config-wrap" id="mapaConfigWrap" style="display:none">
+      <h3>Configurar ubicación del mapa</h3>
+      <div class="mapa-config-form">
+        <div class="form-group">
+          <label>Latitud</label>
+          <input type="text" id="mapaLat" placeholder="18.4737" />
+        </div>
+        <div class="form-group">
+          <label>Longitud</label>
+          <input type="text" id="mapaLon" placeholder="-69.9490" />
+        </div>
+        <div class="form-group full">
+          <label>Etiqueta del pin</label>
+          <input type="text" id="mapaLabel" placeholder="Peña's Autos" maxlength="200" />
+        </div>
+        <p class="fotos-hint" style="grid-column:1/-1">
+          Abre <a href="https://maps.google.com" target="_blank" rel="noopener" style="color:var(--red)">Google Maps</a>,
+          clic derecho → copiar coordenadas.
+        </p>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="guardarMapa()">Guardar ubicación</button>
+          <button class="btn-ghost" style="color:var(--white);border-color:var(--dark-border-2)"
+                  onclick="document.getElementById('mapaConfigWrap').style.display='none'">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario vehículo -->
+    <div class="vehicle-form-wrap" id="vehicleFormWrap" style="display:none">
+      <form id="vehicleForm" enctype="multipart/form-data" onsubmit="submitVehicle(event)">
+        <input type="hidden" id="editId" value="" />
+        <h3 id="formTitle">Nuevo vehículo</h3>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Marca *</label>
+            <input type="text" id="fMarca" name="marca" placeholder="Toyota" required maxlength="100" />
+          </div>
+          <div class="form-group">
+            <label>Modelo *</label>
+            <input type="text" id="fModelo" name="modelo" placeholder="RAV4" required maxlength="100" />
+          </div>
+          <div class="form-group">
+            <label>Año *</label>
+            <input type="number" id="fAnio" name="anio" placeholder="2024" min="1980" max="2030" required />
+          </div>
+          <div class="form-group">
+            <label>Tipo *</label>
+            <select id="fTipo" name="tipo" required>
+              <option value="">Seleccionar…</option>
+              <option>SUV</option>
+              <option>Sedán</option>
+              <option>Vehículos Compactos</option>
+              <option>Pickup</option>
+              <option>Camionetas Compactas</option>
+              <option>Coupé</option>
+            </select>
+          </div>
+          <div class="form-group precio-moneda-group">
+            <label>Precio *</label>
+            <div class="precio-moneda-wrap">
+              <input type="number" id="fPrecio" name="precio" placeholder="1500000" min="1" required />
+              <div class="moneda-selector">
+                <input type="hidden" id="fMoneda" name="moneda" value="DOP" />
+                <button type="button" class="moneda-btn moneda-dop active" id="btnDOP" onclick="setMoneda('DOP')">
+                  RD$ <span class="moneda-label-sm">DOP</span>
+                </button>
+                <button type="button" class="moneda-btn moneda-usd" id="btnUSD" onclick="setMoneda('USD')">
+                  US$ <span class="moneda-label-sm">USD</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Foto principal</label>
+            <input type="file" id="fImagen" name="imagen" accept="image/*" data-crop data-ratio="1.6" />
+          </div>
+        </div><!-- /form-grid -->
+
+        <div class="form-group full">
+          <label>Descripción</label>
+          <textarea id="fDescripcion" name="descripcion" placeholder="Características destacadas…" rows="3" maxlength="500"></textarea>
+        </div>
+
+        <div class="form-group full fotos-extra-group">
+          <label>Fotos adicionales
+            <small style="text-transform:none;letter-spacing:0;color:rgba(201,168,76,.4);font-weight:400">
+              — JPG, PNG, WEBP · máx. 8 MB c/u · sin límite de cantidad
+            </small>
+          </label>
+          <div class="imagenes-existentes" id="imagenesExistentes" style="display:none"></div>
+          <input type="file" id="fImagenesExtra" name="imagenes_extra" accept="image/*" multiple data-crop data-ratio="1.6" />
+          <p class="fotos-hint">Puedes seleccionar varias veces para agregar más fotos</p>
+        </div>
+
+        <div class="oferta-toggle-wrap">
+          <label class="oferta-switch-label">
+            <span class="oferta-switch-text">
+              Poner en oferta
+              <small>Aparecerá en el slide de ofertas</small>
+            </span>
+            <div class="switch-wrap">
+              <input type="checkbox" id="fOferta" name="oferta_check" value="1" onchange="togglePrecioOferta(this)" />
+              <span class="switch-slider"></span>
+            </div>
+          </label>
+          <input type="hidden" id="fOfertaHidden" name="oferta" value="0" />
+          <div class="precio-oferta-wrap" id="precioOfertaWrap" style="display:none">
+            <div class="form-group" style="margin-top:12px">
+              <label>Precio de oferta
+                <small style="text-transform:none;letter-spacing:0;color:rgba(201,168,76,.4);font-weight:400">
+                  — misma moneda elegida
+                </small>
+              </label>
+              <input type="number" id="fPrecioOferta" name="precio_oferta" placeholder="Ej: 1200000" min="1" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" id="submitBtn">Guardar vehículo</button>
+          <button type="button" class="btn-ghost"
+                  style="color:var(--white);border-color:var(--dark-border-2)"
+                  onclick="resetForm()">Cancelar</button>
+        </div>
+        <p class="form-error" id="formError"></p>
+      </form>
+    </div><!-- /vehicle-form-wrap -->
+
+  </div>
+</section>
+{% endif %}
+
+<!-- CATÁLOGO -->
+<section class="catalogo" id="catalogo">
+  <div class="catalogo-inner">
+
+    <div class="section-header">
+      <p class="section-eyebrow">Nuestros vehículos</p>
+      <h2 class="section-title">Catálogo <span class="accent">Completo</span></h2>
+      <p class="section-sub">Vehículos certificados del dealer</p>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters" id="filterBar">
+      <button class="filter-btn active" data-tipo="">Todos</button>
+      <button class="filter-btn" data-tipo="SUV">SUV</button>
+      <button class="filter-btn" data-tipo="Sedán">Sedán</button>
+      <button class="filter-btn" data-tipo="Vehículos Compactos">Vehículos Compactos</button>
+      <button class="filter-btn" data-tipo="Pickup">Pickup</button>
+      <button class="filter-btn" data-tipo="Camionetas Compactas">Camionetas Compactas</button>
+    </div><!-- /filters -->
+
+    <!-- Sort bar -->
+    <div class="sort-bar" id="sortBar">
+      <div class="sort-bar-left">
+        <div class="sort-group">
+          <label class="sort-label" for="sortPrecio">Precio</label>
+          <select class="sort-select" id="sortPrecio" onchange="applySort()">
+            <option value="">Sin ordenar</option>
+            <option value="desc">Mayor a Menor</option>
+            <option value="asc">Menor a Mayor</option>
+          </select>
+        </div>
+        <div class="sort-group">
+          <label class="sort-label" for="sortAnio">Año</label>
+          <select class="sort-select" id="sortAnio" onchange="applySort()">
+            <option value="">Sin ordenar</option>
+            <option value="desc">Más reciente</option>
+            <option value="asc">Más antiguo</option>
+          </select>
+        </div>
+        <div class="sort-group">
+          <label class="sort-label" for="filterMarca">Marca</label>
+          <select class="sort-select" id="filterMarca" onchange="applySort()">
+            <option value="">Todas</option>
+          </select>
+        </div>
+      </div>
+      <button class="sort-clear" id="sortClearBtn" onclick="clearSort()" style="display:none">
+        ✕ Limpiar
+      </button>
+    </div><!-- /sort-bar -->
+
+    <div class="grid-wrap" id="gridWrap">
+      <div class="vehicles-grid" id="vehiclesGrid">
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+          <p>Cargando vehículos…</p>
+        </div>
+      </div>
+      <div class="show-more-wrap" id="showMoreWrap" style="display:none">
+        <button class="btn-show-more" id="showMoreBtn" onclick="toggleShowMore()">
+          <span id="showMoreLabel">Ver más vehículos</span>
+          <svg class="show-more-arrow" id="showMoreArrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+      </div>
+    </div><!-- /gridWrap -->
+
+  </div>
+</section><!-- /catalogo -->
+
+<!-- BENEFICIOS -->
+<section class="beneficios">
+  <div class="beneficios-inner">
+    <div class="ben-card">
+      <div class="ben-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="5" width="20" height="14" rx="2"/>
+          <line x1="2" y1="10" x2="22" y2="10"/>
+        </svg>
+      </div>
+      <h3>Financiamiento Flexible</h3>
+      <p>Cuotas adaptadas a tu presupuesto con los principales bancos del país.</p>
+    </div>
+    <div class="ben-card">
+      <div class="ben-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+      </div>
+      <h3>Inspección Garantizada</h3>
+      <p>Revisión mecánica y estética certificada antes de la entrega.</p>
+    </div>
+    <div class="ben-card">
+      <div class="ben-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+      </div>
+      <h3>Traspaso Incluido</h3>
+      <p>Documentación completa a cargo de nuestro equipo legal.</p>
+    </div>
+    <div class="ben-card">
+      <div class="ben-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <h3>Garantía Post-Venta</h3>
+      <p>Respaldo continuo después de la compra. Tu tranquilidad, nuestra responsabilidad.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- PROCESO -->
+<section class="proceso-section">
+  <div class="proceso-inner">
+    <div class="section-header">
+      <p class="section-eyebrow">¿Cómo funciona?</p>
+      <h2 class="section-title">Tu vehículo en <span class="accent">4 pasos</span></h2>
+      <p class="section-sub">Un proceso sencillo, rápido y completamente acompañado por nuestro equipo</p>
+    </div>
+    <div class="proceso-grid">
+      <div class="paso-card">
+        <div class="paso-num">01</div>
+        <div class="paso-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+        </div>
+        <h3>Explora el catálogo</h3>
+        <p>Navega cientos de vehículos filtrados por tipo, marca y precio. Encuentra el que se ajusta a tu presupuesto.</p>
+      </div>
+      <div class="paso-card">
+        <div class="paso-num">02</div>
+        <div class="paso-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.69 18.3 19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.47 2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+        </div>
+        <h3>Contáctanos</h3>
+        <p>Escríbenos por WhatsApp o llámanos. Uno de nuestros asesores te atenderá de inmediato, sin presiones.</p>
+      </div>
+      <div class="paso-card">
+        <div class="paso-num">03</div>
+        <div class="paso-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="2" y="5" width="20" height="14" rx="2"/>
+            <line x1="2" y1="10" x2="22" y2="10"/>
+          </svg>
+        </div>
+        <h3>Gestiona tu financiamiento</h3>
+        <p>Te conectamos con el banco ideal. Tasas competitivas, plazos flexibles y aprobación rápida.</p>
+      </div>
+      <div class="paso-card">
+        <div class="paso-num">04</div>
+        <div class="paso-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="8 12 11 15 16 10"/>
+          </svg>
+        </div>
+        <h3>Recibe tu vehículo</h3>
+        <p>Traspaso incluido, documentación completa. Tu nuevo vehículo listo para rodar desde el primer día.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACTO + MAPA -->
+<section class="contacto" id="contacto">
+  <div class="contacto-inner">
+    <div class="section-header">
+      <p class="section-eyebrow">Contáctanos</p>
+      <h2 class="section-title">Estamos aquí<br/><span class="accent">para ayudarte</span></h2>
+      <p class="section-sub">Visítanos o escríbenos — te asesoramos sin compromiso</p>
+    </div>
+    <div class="contacto-mapa-wrap">
+      <div class="contacto-cards">
+        <a href="https://wa.me/18296045932?text=Hola,%20estoy%20interesado%20en%20un%20veh%C3%ADculo%20de%20Pe%C3%B1a's%20Autos"
+           class="contacto-card whatsapp" target="_blank" rel="noopener">
+          <span class="c-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+              <path d="M12 2C6.486 2 2 6.486 2 12c0 1.846.505 3.58 1.383 5.072L2 22l5.104-1.342A9.956 9.956 0 0 0 12 22c5.514 0 10-4.486 10-10S17.514 2 12 2z" opacity=".25"/>
+            </svg>
+          </span>
+          <div>
+            <span class="c-label">WhatsApp</span>
+            <span class="c-value">+1 (829) 604-5932</span>
+          </div>
+        </a>
+        <a href="tel:+18296045932" class="contacto-card">
+          <span class="c-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.47 2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </span>
+          <div>
+            <span class="c-label">Teléfono</span>
+            <span class="c-value">+1 (829) 604-5932</span>
+          </div>
+        </a>
+        <a href="mailto:mpena5377@gmail.com" class="contacto-card">
+          <span class="c-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </span>
+          <div>
+            <span class="c-label">Correo electrónico</span>
+            <span class="c-value">mpena5377@gmail.com</span>
+          </div>
+        </a>
+        <a href="https://www.instagram.com/penasautosrd" class="contacto-card" target="_blank" rel="noopener">
+          <span class="c-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+            </svg>
+          </span>
+          <div>
+            <span class="c-label">Instagram</span>
+            <span class="c-value">@penasautosrd</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer" id="siteFooter">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-brand-top">
+        <img src="/icons/logo-emblem.png" alt="Peña's Autos" class="logo-emblem footer-logo-emblem" width="60" height="34" />
+        <span class="footer-logo-text">Peña's Autos</span>
+      </div>
+      <p>Santo Domingo, República Dominicana.<br/>Tu dealer de confianza.</p>
+    </div>
+    <div class="footer-col">
+      <p class="footer-col-title">Navegación</p>
+      <nav class="footer-nav">
+        <a href="#catalogo">Catálogo</a>
+        <a href="#ofertas-section">Ofertas</a>
+        <a href="#financiamiento">Financiamiento</a>
+      </nav>
+    </div>
+    <div class="footer-col">
+      <p class="footer-col-title">Contacto</p>
+      <div class="footer-contact">
+        <span>+1 (829) 604-5932</span>
+        <span>mpena5377@gmail.com</span>
+        <span>Instagram: @penasautosrd</span>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-legal">
+      <span id="secretTrigger">©</span> 2026 Peña's Autos. Todos los derechos reservados.
+    </p>
+    <p class="footer-tagline">TU DEALER DE CONFIANZA</p>
+  </div>
+</footer>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+
+<!-- PWA Install Banner -->
+<div class="pwa-banner" id="pwaBanner">
+  <div class="pwa-banner-inner">
+    <div class="pwa-banner-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.5" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="pwa-banner-text">
+      <strong>Agregar a pantalla principal</strong>
+      <span>Accede rápido a Peña's Autos desde tu celular</span>
+    </div>
+    <button class="pwa-banner-install" id="pwaBannerInstall">Instalar</button>
+    <button class="pwa-banner-close" id="pwaBannerClose" aria-label="Cerrar">✕</button>
+  </div>
+</div>
+
+<!-- PWA FAB — botón flotante cuando se cierra el banner -->
+<button class="pwa-fab" id="pwaFab" style="display:none" title="Agregar a pantalla principal">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <path d="M12 5v14M5 12l7 7 7-7"/>
+  </svg>
+  <span>Instalar app</span>
+</button>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/app.js"></script>
+{% endblock %}
